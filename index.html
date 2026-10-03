@@ -89,57 +89,71 @@
     </div>
   </header>
 
-  <!-- Hoofdvenster: Vult exact het scherm zonder scrollen -->
+  <!-- Hoofdvenster -->
   <main class="flex-1 flex flex-col p-2 sm:p-3 gap-2 min-h-0 overflow-hidden justify-between">
     
-    <!-- 1. Bovenste / Middendeel: Grotere Spelerskaarten met Vorige Worp -->
+    <!-- 1. Spelerskaarten met Vorige Worp én Gemiddelde Rake Pijlen -->
     <section class="shrink-0 flex flex-col gap-2">
       <div class="grid grid-cols-2 gap-2 sm:gap-3">
         
-        <!-- Speler 1 Kaart (Groter & hoger) -->
-        <div id="p1Card" onclick="openPlayerModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-slate-900 p-3 sm:p-4 flex flex-col justify-between shadow-xl min-h-[120px] sm:min-h-[145px]">
+        <!-- Speler 1 Kaart -->
+        <div id="p1Card" onclick="openPlayerModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-slate-900 p-3 sm:p-3.5 flex flex-col justify-between shadow-xl min-h-[135px]">
           <div class="flex items-center justify-between">
-            <span id="p1NameDisplay" class="font-bold text-sm sm:text-base tracking-wide truncate max-w-[110px] sm:max-w-[160px] text-white">Speler 1</span>
-            <span id="p1SetsBadge" class="text-[11px] sm:text-xs bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full border border-slate-700 font-semibold font-mono">Sets: 0</span>
+            <span id="p1NameDisplay" class="font-bold text-sm sm:text-base tracking-wide truncate max-w-[100px] sm:max-w-[150px] text-white">Speler 1</span>
+            <div class="flex items-center gap-1.5">
+              <span id="p1HitRateBadge" class="text-[10px] sm:text-[11px] bg-slate-800 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-900/60 font-semibold font-mono">0% raak</span>
+              <span id="p1SetsBadge" class="text-[10px] sm:text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 font-semibold font-mono">Sets: 0</span>
+            </div>
           </div>
 
-          <div class="flex items-baseline justify-between mt-1 sm:mt-2">
+          <div class="flex items-baseline justify-between mt-1">
             <div>
               <div id="p1Score" class="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono leading-none">0</div>
-              <div class="text-[10px] sm:text-[11px] text-slate-400 mt-1 uppercase tracking-wider font-semibold">Totaal Punten</div>
+              <div class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 uppercase tracking-wider font-semibold">Totaal Punten</div>
             </div>
-            <!-- Vorige worp score badge -->
-            <div class="text-right">
+            
+            <!-- Statistieken & Vorige Worp -->
+            <div class="text-right flex flex-col items-end gap-1">
+              <div id="p1AvgHit" class="text-[11px] sm:text-xs font-semibold text-slate-300 font-mono bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800">
+                Ø Gem: <span class="text-emerald-400 font-bold">0.0</span> pt/raak
+              </div>
               <div id="p1LastTurn" class="text-xs sm:text-sm font-semibold text-emerald-400 font-mono bg-emerald-950/70 px-2 py-1 rounded-lg border border-emerald-800/60 shadow-inner">
                 Vorige: -
               </div>
             </div>
           </div>
 
-          <div id="p1TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-cyan-400"></div>
+          <div id="p1TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 to-cyan-400"></div>
         </div>
 
-        <!-- Speler 2 Kaart (Groter & hoger) -->
-        <div id="p2Card" onclick="openPlayerModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-slate-900 p-3 sm:p-4 flex flex-col justify-between shadow-xl min-h-[120px] sm:min-h-[145px]">
+        <!-- Speler 2 Kaart -->
+        <div id="p2Card" onclick="openPlayerModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-slate-900 p-3 sm:p-3.5 flex flex-col justify-between shadow-xl min-h-[135px]">
           <div class="flex items-center justify-between">
-            <span id="p2NameDisplay" class="font-bold text-sm sm:text-base tracking-wide truncate max-w-[110px] sm:max-w-[160px] text-white">Speler 2</span>
-            <span id="p2SetsBadge" class="text-[11px] sm:text-xs bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full border border-slate-700 font-semibold font-mono">Sets: 0</span>
+            <span id="p2NameDisplay" class="font-bold text-sm sm:text-base tracking-wide truncate max-w-[100px] sm:max-w-[150px] text-white">Speler 2</span>
+            <div class="flex items-center gap-1.5">
+              <span id="p2HitRateBadge" class="text-[10px] sm:text-[11px] bg-slate-800 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-900/60 font-semibold font-mono">0% raak</span>
+              <span id="p2SetsBadge" class="text-[10px] sm:text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 font-semibold font-mono">Sets: 0</span>
+            </div>
           </div>
 
-          <div class="flex items-baseline justify-between mt-1 sm:mt-2">
+          <div class="flex items-baseline justify-between mt-1">
             <div>
               <div id="p2Score" class="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono leading-none">0</div>
-              <div class="text-[10px] sm:text-[11px] text-slate-400 mt-1 uppercase tracking-wider font-semibold">Totaal Punten</div>
+              <div class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 uppercase tracking-wider font-semibold">Totaal Punten</div>
             </div>
-            <!-- Vorige worp score badge -->
-            <div class="text-right">
+            
+            <!-- Statistieken & Vorige Worp -->
+            <div class="text-right flex flex-col items-end gap-1">
+              <div id="p2AvgHit" class="text-[11px] sm:text-xs font-semibold text-slate-300 font-mono bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800">
+                Ø Gem: <span class="text-cyan-400 font-bold">0.0</span> pt/raak
+              </div>
               <div id="p2LastTurn" class="text-xs sm:text-sm font-semibold text-cyan-400 font-mono bg-cyan-950/70 px-2 py-1 rounded-lg border border-cyan-800/60 shadow-inner">
                 Vorige: -
               </div>
             </div>
           </div>
 
-          <div id="p2TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-400"></div>
+          <div id="p2TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 to-blue-400"></div>
         </div>
       </div>
 
@@ -161,15 +175,15 @@
             <div id="dartSlot1" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center font-bold text-xs text-slate-300 font-mono">2</div>
             <div id="dartSlot2" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center font-bold text-xs text-slate-300 font-mono">3</div>
           </div>
-          <div id="turnPointsBadge" class="bg-slate-800 px-2 py-1 rounded-md text-xs font-mono font-bold text-emerald-300 min-w-[42px] text-center border border-slate-700">
+          <div id="turnPointsBadge" class="bg-slate-800 px-2.5 py-1 rounded-md text-xs font-mono font-bold text-emerald-300 min-w-[46px] text-center border border-slate-700">
             +0 pt
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 2. Midden: Huidig Doelwit & Grote Scoring Drukknoppen -->
-    <section class="flex flex-col flex-1 min-h-0 gap-2 justify-between">
+    <!-- 2. Midden: Huidig Doelwit & EXTRA GROTE Scoring Knoppen -->
+    <section class="flex flex-col flex-1 min-h-0 gap-2.5 justify-between">
       
       <!-- Huidig Doelwit Display -->
       <div class="relative bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-xl px-3 py-2 sm:py-2.5 flex items-center justify-between shadow-xl shrink-0">
@@ -191,43 +205,43 @@
         </div>
       </div>
 
-      <!-- 4 Grote Touch-vriendelijke Drukknoppen in het midden (Flex-1) -->
-      <div class="grid grid-cols-2 gap-2 flex-1 min-h-0">
+      <!-- 4 Extra Grote Touch Knoppen voor de huidige worp -->
+      <div class="grid grid-cols-2 gap-2.5 flex-1 min-h-0">
         <!-- MIS -->
-        <button onclick="registerThrow(0)" class="tap-btn flex-1 min-h-[50px] rounded-xl bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700 hover:border-slate-500 text-slate-200 flex flex-col items-center justify-center p-2 shadow-lg active:bg-slate-700">
-          <span class="text-lg sm:text-2xl font-black tracking-wider text-rose-400 flex items-center gap-1.5 leading-tight">
-            <i class="fa-solid fa-xmark text-sm sm:text-base"></i> MIS
+        <button onclick="registerThrow(0)" class="tap-btn flex-1 min-h-[64px] sm:min-h-[80px] rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700 hover:border-slate-500 text-slate-200 flex flex-col items-center justify-center p-3 shadow-xl active:bg-slate-700">
+          <span class="text-xl sm:text-3xl font-black tracking-wider text-rose-400 flex items-center gap-2 leading-tight">
+            <i class="fa-solid fa-xmark text-lg sm:text-2xl"></i> MIS
           </span>
-          <span class="text-[11px] text-slate-400 font-medium">0 punten</span>
+          <span class="text-xs sm:text-sm text-slate-400 font-semibold mt-0.5">0 punten</span>
         </button>
 
         <!-- ENKEL -->
-        <button id="btnSingle" onclick="registerThrow(1)" class="tap-btn flex-1 min-h-[50px] rounded-xl bg-gradient-to-b from-emerald-950/80 to-slate-900 border-2 border-emerald-600/70 hover:border-emerald-400 text-emerald-100 flex flex-col items-center justify-center p-2 shadow-lg shadow-emerald-950/30 active:bg-emerald-900">
-          <span id="lblSingle" class="text-lg sm:text-2xl font-black tracking-wider text-emerald-400 leading-tight">ENKEL</span>
-          <span id="subSingle" class="text-[11px] text-emerald-300/80 font-medium">1 punt</span>
+        <button id="btnSingle" onclick="registerThrow(1)" class="tap-btn flex-1 min-h-[64px] sm:min-h-[80px] rounded-2xl bg-gradient-to-b from-emerald-950/80 to-slate-900 border-2 border-emerald-600/70 hover:border-emerald-400 text-emerald-100 flex flex-col items-center justify-center p-3 shadow-xl shadow-emerald-950/30 active:bg-emerald-900">
+          <span id="lblSingle" class="text-xl sm:text-3xl font-black tracking-wider text-emerald-400 leading-tight">ENKEL</span>
+          <span id="subSingle" class="text-xs sm:text-sm text-emerald-300/80 font-semibold mt-0.5">1 punt</span>
         </button>
 
         <!-- DUBBEL -->
-        <button id="btnDouble" onclick="registerThrow(2)" class="tap-btn flex-1 min-h-[50px] rounded-xl bg-gradient-to-b from-blue-950/80 to-slate-900 border-2 border-blue-600/70 hover:border-blue-400 text-blue-100 flex flex-col items-center justify-center p-2 shadow-lg shadow-blue-950/30 active:bg-blue-900">
-          <span id="lblDouble" class="text-lg sm:text-2xl font-black tracking-wider text-blue-400 leading-tight">DUBBEL</span>
-          <span id="subDouble" class="text-[11px] text-blue-300/80 font-medium">2 punten</span>
+        <button id="btnDouble" onclick="registerThrow(2)" class="tap-btn flex-1 min-h-[64px] sm:min-h-[80px] rounded-2xl bg-gradient-to-b from-blue-950/80 to-slate-900 border-2 border-blue-600/70 hover:border-blue-400 text-blue-100 flex flex-col items-center justify-center p-3 shadow-xl shadow-blue-950/30 active:bg-blue-900">
+          <span id="lblDouble" class="text-xl sm:text-3xl font-black tracking-wider text-blue-400 leading-tight">DUBBEL</span>
+          <span id="subDouble" class="text-xs sm:text-sm text-blue-300/80 font-semibold mt-0.5">2 punten</span>
         </button>
 
         <!-- TRIPLE -->
-        <button id="btnTriple" onclick="registerThrow(3)" class="tap-btn flex-1 min-h-[50px] rounded-xl bg-gradient-to-b from-purple-950/80 to-slate-900 border-2 border-purple-600/70 hover:border-purple-400 text-purple-100 flex flex-col items-center justify-center p-2 shadow-lg shadow-purple-950/30 active:bg-purple-900 disabled:opacity-30 disabled:pointer-events-none">
-          <span id="lblTriple" class="text-lg sm:text-2xl font-black tracking-wider text-purple-400 leading-tight">TRIPLE</span>
-          <span id="subTriple" class="text-[11px] text-purple-300/80 font-medium">3 punten</span>
+        <button id="btnTriple" onclick="registerThrow(3)" class="tap-btn flex-1 min-h-[64px] sm:min-h-[80px] rounded-2xl bg-gradient-to-b from-purple-950/80 to-slate-900 border-2 border-purple-600/70 hover:border-purple-400 text-purple-100 flex flex-col items-center justify-center p-3 shadow-xl shadow-purple-950/30 active:bg-purple-900 disabled:opacity-30 disabled:pointer-events-none">
+          <span id="lblTriple" class="text-xl sm:text-3xl font-black tracking-wider text-purple-400 leading-tight">TRIPLE</span>
+          <span id="subTriple" class="text-xs sm:text-sm text-purple-300/80 font-semibold mt-0.5">3 punten</span>
         </button>
       </div>
 
       <!-- Undo knop -->
-      <button id="undoBtn" onclick="undoLastThrow()" class="tap-btn w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow shrink-0 active:scale-[0.99] disabled:opacity-30 disabled:pointer-events-none">
+      <button id="undoBtn" onclick="undoLastThrow()" class="tap-btn w-full py-2.5 sm:py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow shrink-0 active:scale-[0.99] disabled:opacity-30 disabled:pointer-events-none">
         <i class="fa-solid fa-arrow-rotate-left text-amber-400"></i>
         <span>Laatste pijl ongedaan maken (Undo)</span>
       </button>
     </section>
 
-    <!-- 3. Helemaal Onderin: Resterende nummers (Felle Amber / Glow weergave) -->
+    <!-- 3. Onderin: Resterende nummers (Felle Amber / Gouden weergave) -->
     <section class="bg-slate-900/90 border border-amber-900/50 rounded-xl p-2 sm:p-2.5 flex flex-col gap-1.5 shrink-0 shadow-lg shadow-amber-950/20">
       <div class="flex items-center justify-between text-[11px] sm:text-xs px-1 font-bold">
         <span class="text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -236,7 +250,7 @@
         <span id="targetCounter" class="text-amber-300 font-mono font-black text-xs sm:text-sm bg-amber-950/70 px-2 py-0.5 rounded border border-amber-700/60">1 / 21</span>
       </div>
       <div id="targetsScroller" class="flex gap-1.5 sm:gap-2 overflow-x-auto custom-scroll pb-1 pt-0.5">
-        <!-- Wordt gevuld met felle badges -->
+        <!-- Wordt dynamisch gevuld -->
       </div>
     </section>
 
@@ -330,15 +344,14 @@
 
   <script>
     // --- Spelstatus ---
-    let targets = []; // 21 doelen: random 1-20 + bull(25)
-    let currentTargetIndex = 0; // 0..20
-    let currentPlayer = 1; // 1 of 2
-    let currentDart = 1; // 1..3
+    let targets = []; 
+    let currentTargetIndex = 0; 
+    let currentPlayer = 1; 
+    let currentDart = 1; 
 
     let p1TurnThrows = [];
     let p2TurnThrows = [];
 
-    // Vorige worp scores
     let p1LastTurnScore = null;
     let p2LastTurnScore = null;
 
@@ -355,7 +368,6 @@
     let actionHistory = [];
     let wakeLock = null;
 
-    // --- Start & Opslag ---
     window.addEventListener('DOMContentLoaded', () => {
       loadStorageData();
       startNewGame(false);
@@ -400,7 +412,6 @@
       } catch (e) {}
     }
 
-    // --- Nieuw Spel ---
     function generateTargetSequence() {
       let nums = [];
       for (let i = 1; i <= 20; i++) nums.push(i);
@@ -408,7 +419,7 @@
         const j = Math.floor(Math.random() * (i + 1));
         [nums[i], nums[j]] = [nums[j], nums[i]];
       }
-      nums.push(25); // Bullseye als 21e finale
+      nums.push(25); 
       return nums;
     }
 
@@ -432,7 +443,6 @@
       updateUI();
     }
 
-    // --- UI Renderers ---
     function updatePlayerNamesUI() {
       document.getElementById('p1NameDisplay').textContent = player1Name;
       document.getElementById('p2NameDisplay').textContent = player2Name;
@@ -501,12 +511,32 @@
       renderTargetsList();
     }
 
+    function calculateLivePlayerStats(throws) {
+      const total = throws.length;
+      if (total === 0) return { hitRate: '0%', avgHit: '0.0' };
+      const hits = throws.filter(t => t > 0);
+      const hitPointsSum = hits.reduce((a, b) => a + b, 0);
+      const hitRate = Math.round((hits.length / total) * 100) + '%';
+      const avgHit = hits.length > 0 ? (hitPointsSum / hits.length).toFixed(1) : '0.0';
+      return { hitRate, avgHit };
+    }
+
     function updateUI() {
       const p1Total = p1MatchThrows.reduce((a, b) => a + b, 0);
       const p2Total = p2MatchThrows.reduce((a, b) => a + b, 0);
 
       document.getElementById('p1Score').textContent = p1Total;
       document.getElementById('p2Score').textContent = p2Total;
+
+      // Bereken live hit-statistieken
+      const p1Live = calculateLivePlayerStats(p1MatchThrows);
+      const p2Live = calculateLivePlayerStats(p2MatchThrows);
+
+      document.getElementById('p1HitRateBadge').textContent = `${p1Live.hitRate} raak`;
+      document.getElementById('p2HitRateBadge').textContent = `${p2Live.hitRate} raak`;
+
+      document.getElementById('p1AvgHit').innerHTML = `Ø Gem: <span class="text-emerald-400 font-bold">${p1Live.avgHit}</span> pt/raak`;
+      document.getElementById('p2AvgHit').innerHTML = `Ø Gem: <span class="text-cyan-400 font-bold">${p2Live.avgHit}</span> pt/raak`;
 
       // Update Vorige Worp Weergave
       const p1LastEl = document.getElementById('p1LastTurn');
@@ -574,7 +604,6 @@
       document.getElementById('undoBtn').disabled = actionHistory.length === 0;
     }
 
-    // --- Scoring & Spelverloop ---
     function registerThrow(points) {
       if (currentTargetIndex >= targets.length) return;
 
@@ -669,7 +698,6 @@
       openStatsModal(true);
     }
 
-    // --- Statistieken Modal ---
     function openStatsModal(isGameOver = false) {
       const content = document.getElementById('statsContent');
       const title = document.getElementById('statsTitle');
@@ -713,6 +741,7 @@
 
           <div class="divide-y divide-slate-850">
             ${renderStatRow('Rake Pijlen %', `${p1Stats.hitPercent}%`, `${p2Stats.hitPercent}%`, p1Stats.hitPercent, p2Stats.hitPercent)}
+            ${renderStatRow('Gem. per Rake Pijl', `${p1Stats.avgPerHit} pt`, `${p2Stats.avgPerHit} pt`, parseFloat(p1Stats.avgPerHit), parseFloat(p2Stats.avgPerHit))}
             ${renderStatRow('Raken / Totaal', `${p1Stats.hits}/${p1Stats.totalDarts}`, `${p2Stats.hits}/${p2Stats.totalDarts}`)}
             ${renderStatRow('Triples (3pt)', `${p1Stats.triples} (${p1Stats.triplesPct}%)`, `${p2Stats.triples} (${p2Stats.triplesPct}%)`, p1Stats.triples, p2Stats.triples)}
             ${renderStatRow('Doubles (2pt)', `${p1Stats.doubles} (${p1Stats.doublesPct}%)`, `${p2Stats.doubles} (${p2Stats.doublesPct}%)`, p1Stats.doubles, p2Stats.doubles)}
@@ -745,7 +774,7 @@
     function calculateStats(throws) {
       const totalDarts = throws.length;
       if (totalDarts === 0) {
-        return { totalDarts: 0, totalPoints: 0, hits: 0, hitPercent: 0, triples: 0, triplesPct: 0, doubles: 0, doublesPct: 0, singles: 0, singlesPct: 0, misses: 0, missesPct: 0, avgTurn: "0.0" };
+        return { totalDarts: 0, totalPoints: 0, hits: 0, hitPercent: 0, avgPerHit: "0.0", triples: 0, triplesPct: 0, doubles: 0, doublesPct: 0, singles: 0, singlesPct: 0, misses: 0, missesPct: 0, avgTurn: "0.0" };
       }
       let singles = 0, doubles = 0, triples = 0, misses = 0, points = 0;
       throws.forEach(t => {
@@ -757,6 +786,7 @@
       });
       const hits = singles + doubles + triples;
       const hitPercent = ((hits / totalDarts) * 100).toFixed(1);
+      const avgPerHit = hits > 0 ? (points / hits).toFixed(2) : "0.0";
       const triplesPct = ((triples / totalDarts) * 100).toFixed(0);
       const doublesPct = ((doubles / totalDarts) * 100).toFixed(0);
       const singlesPct = ((singles / totalDarts) * 100).toFixed(0);
@@ -764,14 +794,13 @@
       const turns = Math.ceil(totalDarts / 3) || 1;
       const avgTurn = (points / turns).toFixed(1);
 
-      return { totalDarts, totalPoints: points, hits, hitPercent, triples, triplesPct, doubles, doublesPct, singles, singlesPct, misses, missesPct, avgTurn };
+      return { totalDarts, totalPoints: points, hits, hitPercent, avgPerHit, triples, triplesPct, doubles, doublesPct, singles, singlesPct, misses, missesPct, avgTurn };
     }
 
     function closeStatsModal() {
       document.getElementById('statsModal').classList.add('hidden');
     }
 
-    // --- Bevestig Nieuw Potje Modal ---
     function confirmNewGame() {
       if (actionHistory.length === 0) {
         startNewGame(true);
@@ -787,7 +816,6 @@
       startNewGame(true);
     }
 
-    // --- Spelers Modal ---
     function openPlayerModal() {
       document.getElementById('p1Input').value = player1Name;
       document.getElementById('p2Input').value = player2Name;
@@ -837,7 +865,6 @@
       });
     }
 
-    // --- Wake Lock (Scherm Aan) ---
     async function toggleWakeLock() {
       const btn = document.getElementById('wakeLockBtn');
       const icon = document.getElementById('wakeLockIcon');
