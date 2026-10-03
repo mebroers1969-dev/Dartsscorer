@@ -29,22 +29,21 @@
       user-select: none;
     }
     .tap-btn:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
     }
     @keyframes pulse-ring {
-      0% { transform: scale(0.97); opacity: 0.85; }
-      50% { transform: scale(1.03); opacity: 1; }
-      100% { transform: scale(0.97); opacity: 0.85; }
+      0% { transform: scale(0.96); opacity: 0.85; }
+      50% { transform: scale(1.04); opacity: 1; }
+      100% { transform: scale(0.96); opacity: 0.85; }
     }
     .active-target-pulse {
       animation: pulse-ring 2s infinite ease-in-out;
     }
     .custom-scroll::-webkit-scrollbar {
-      height: 6px;
-      width: 6px;
+      height: 5px;
     }
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: #b45309;
+      background: #f59e0b;
       border-radius: 9999px;
     }
   </style>
@@ -66,7 +65,7 @@
       </div>
     </div>
 
-    <!-- Knoppenbalk -->
+    <!-- Actieknoppen -->
     <div class="flex items-center gap-1.5">
       <button onclick="openStatsModal()" class="tap-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium border border-slate-700 flex items-center gap-1">
         <i class="fa-solid fa-chart-pie text-cyan-400"></i>
@@ -89,168 +88,161 @@
     </div>
   </header>
 
-  <!-- Hoofdvenster -->
+  <!-- Hoofdindeling -->
   <main class="flex-1 flex flex-col p-2 sm:p-3 gap-2 min-h-0 overflow-hidden justify-between">
     
-    <!-- 1. Spelerskaarten met Vorige Worp én Gemiddelde Rake Pijlen -->
-    <section class="shrink-0 flex flex-col gap-2">
-      <div class="grid grid-cols-2 gap-2 sm:gap-3">
-        
-        <!-- Speler 1 Kaart -->
-        <div id="p1Card" onclick="openPlayerModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-slate-900 p-3 sm:p-3.5 flex flex-col justify-between shadow-xl min-h-[135px]">
-          <div class="flex items-center justify-between">
-            <span id="p1NameDisplay" class="font-bold text-sm sm:text-base tracking-wide truncate max-w-[100px] sm:max-w-[150px] text-white">Speler 1</span>
-            <div class="flex items-center gap-1.5">
-              <span id="p1HitRateBadge" class="text-[10px] sm:text-[11px] bg-slate-800 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-900/60 font-semibold font-mono">0% raak</span>
-              <span id="p1SetsBadge" class="text-[10px] sm:text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 font-semibold font-mono">Sets: 0</span>
-            </div>
-          </div>
-
-          <div class="flex items-baseline justify-between mt-1">
-            <div>
-              <div id="p1Score" class="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono leading-none">0</div>
-              <div class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 uppercase tracking-wider font-semibold">Totaal Punten</div>
-            </div>
-            
-            <!-- Statistieken & Vorige Worp -->
-            <div class="text-right flex flex-col items-end gap-1">
-              <div id="p1AvgHit" class="text-[11px] sm:text-xs font-semibold text-slate-300 font-mono bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800">
-                Ø Gem: <span class="text-emerald-400 font-bold">0.0</span> pt/raak
-              </div>
-              <div id="p1LastTurn" class="text-xs sm:text-sm font-semibold text-emerald-400 font-mono bg-emerald-950/70 px-2 py-1 rounded-lg border border-emerald-800/60 shadow-inner">
-                Vorige: -
-              </div>
-            </div>
-          </div>
-
-          <div id="p1TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 to-cyan-400"></div>
+    <!-- 1. Bovenste deel: Spelerskaarten met GEMIDDELDE RAKE PIJLEN & VORIGE WORP -->
+    <section class="shrink-0 grid grid-cols-2 gap-2 sm:gap-3">
+      <!-- Speler 1 Kaart -->
+      <div id="p1Card" onclick="openPlayerModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-slate-900 p-2.5 sm:p-3 flex flex-col justify-between shadow-lg min-h-[125px]">
+        <div class="flex items-center justify-between">
+          <span id="p1NameDisplay" class="font-bold text-sm sm:text-base tracking-wide truncate max-w-[110px] sm:max-w-[160px] text-white">Speler 1</span>
+          <span id="p1SetsBadge" class="text-[10px] sm:text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 font-semibold font-mono">Sets: 0</span>
         </div>
 
-        <!-- Speler 2 Kaart -->
-        <div id="p2Card" onclick="openPlayerModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-slate-900 p-3 sm:p-3.5 flex flex-col justify-between shadow-xl min-h-[135px]">
-          <div class="flex items-center justify-between">
-            <span id="p2NameDisplay" class="font-bold text-sm sm:text-base tracking-wide truncate max-w-[100px] sm:max-w-[150px] text-white">Speler 2</span>
-            <div class="flex items-center gap-1.5">
-              <span id="p2HitRateBadge" class="text-[10px] sm:text-[11px] bg-slate-800 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-900/60 font-semibold font-mono">0% raak</span>
-              <span id="p2SetsBadge" class="text-[10px] sm:text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 font-semibold font-mono">Sets: 0</span>
+        <div class="flex items-baseline justify-between mt-1">
+          <div>
+            <div id="p1Score" class="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono leading-none">0</div>
+            <div class="text-[9px] sm:text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-semibold">Totaal Punten</div>
+          </div>
+          
+          <!-- Statistieken in het spelersvlak -->
+          <div class="text-right flex flex-col items-end gap-1">
+            <div id="p1AvgHit" class="text-[11px] sm:text-xs font-semibold text-emerald-300 font-mono bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/60">
+              Gem. raak: <span class="font-bold text-white">0.0</span> pt
+            </div>
+            <div id="p1LastTurn" class="text-[10px] sm:text-xs font-semibold text-slate-300 font-mono bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800">
+              Vorige: -
             </div>
           </div>
-
-          <div class="flex items-baseline justify-between mt-1">
-            <div>
-              <div id="p2Score" class="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono leading-none">0</div>
-              <div class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 uppercase tracking-wider font-semibold">Totaal Punten</div>
-            </div>
-            
-            <!-- Statistieken & Vorige Worp -->
-            <div class="text-right flex flex-col items-end gap-1">
-              <div id="p2AvgHit" class="text-[11px] sm:text-xs font-semibold text-slate-300 font-mono bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800">
-                Ø Gem: <span class="text-cyan-400 font-bold">0.0</span> pt/raak
-              </div>
-              <div id="p2LastTurn" class="text-xs sm:text-sm font-semibold text-cyan-400 font-mono bg-cyan-950/70 px-2 py-1 rounded-lg border border-cyan-800/60 shadow-inner">
-                Vorige: -
-              </div>
-            </div>
-          </div>
-
-          <div id="p2TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 to-blue-400"></div>
         </div>
+
+        <div id="p1TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 to-cyan-400"></div>
       </div>
 
-      <!-- Beurt & Pijlen Tracker -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 sm:p-2.5 flex items-center justify-between shrink-0 shadow-sm">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-          <div class="flex flex-col">
-            <span class="text-xs sm:text-sm font-semibold text-slate-200">
-              Aan de beurt: <span id="currentTurnPlayer" class="text-emerald-400 font-bold">Speler 1</span>
-            </span>
-            <span class="text-[10px] sm:text-[11px] text-slate-400">Gooi 3 pijlen op het getoonde doelwit</span>
+      <!-- Speler 2 Kaart -->
+      <div id="p2Card" onclick="openPlayerModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-slate-900 p-2.5 sm:p-3 flex flex-col justify-between shadow-lg min-h-[125px]">
+        <div class="flex items-center justify-between">
+          <span id="p2NameDisplay" class="font-bold text-sm sm:text-base tracking-wide truncate max-w-[110px] sm:max-w-[160px] text-white">Speler 2</span>
+          <span id="p2SetsBadge" class="text-[10px] sm:text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 font-semibold font-mono">Sets: 0</span>
+        </div>
+
+        <div class="flex items-baseline justify-between mt-1">
+          <div>
+            <div id="p2Score" class="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono leading-none">0</div>
+            <div class="text-[9px] sm:text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-semibold">Totaal Punten</div>
+          </div>
+          
+          <!-- Statistieken in het spelersvlak -->
+          <div class="text-right flex flex-col items-end gap-1">
+            <div id="p2AvgHit" class="text-[11px] sm:text-xs font-semibold text-cyan-300 font-mono bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">
+              Gem. raak: <span class="font-bold text-white">0.0</span> pt
+            </div>
+            <div id="p2LastTurn" class="text-[10px] sm:text-xs font-semibold text-slate-300 font-mono bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800">
+              Vorige: -
+            </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <div class="flex items-center gap-1 sm:gap-1.5">
-            <div id="dartSlot0" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center font-bold text-xs text-slate-300 font-mono">1</div>
-            <div id="dartSlot1" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center font-bold text-xs text-slate-300 font-mono">2</div>
-            <div id="dartSlot2" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center font-bold text-xs text-slate-300 font-mono">3</div>
+        <div id="p2TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 to-blue-400"></div>
+      </div>
+    </section>
+
+    <!-- 2. Middendeel: Links (Groot Beurt & Doelwit) | Rechts (Duimknoppen Mis/Enkel/enz.) -->
+    <section class="flex flex-row flex-1 min-h-0 gap-2 sm:gap-3 items-stretch">
+      
+      <!-- LINKS: Grote "Aan de beurt" & Doelwit Card -->
+      <div class="flex-1 flex flex-col justify-between bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-3 sm:p-4 shadow-xl">
+        <!-- Speler aan de beurt titel -->
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
+            <div class="flex flex-col">
+              <span class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Aan de beurt</span>
+              <span id="currentTurnPlayer" class="text-lg sm:text-xl font-black text-emerald-400">Speler 1</span>
+            </div>
           </div>
-          <div id="turnPointsBadge" class="bg-slate-800 px-2.5 py-1 rounded-md text-xs font-mono font-bold text-emerald-300 min-w-[46px] text-center border border-slate-700">
+          <div id="turnPointsBadge" class="bg-slate-800 px-3 py-1 rounded-xl text-sm sm:text-base font-mono font-bold text-emerald-300 border border-slate-700 shadow-inner">
             +0 pt
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- 2. Midden: Huidig Doelwit & EXTRA GROTE Scoring Knoppen -->
-    <section class="flex flex-col flex-1 min-h-0 gap-2.5 justify-between">
-      
-      <!-- Huidig Doelwit Display -->
-      <div class="relative bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-xl px-3 py-2 sm:py-2.5 flex items-center justify-between shadow-xl shrink-0">
-        <div class="flex flex-col">
-          <span class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-widest">HUIDIG DOELWIT</span>
-          <span id="targetHelperText" class="text-xs text-slate-300">Raak Single, Double of Triple</span>
-          <span class="text-[10px] text-slate-400 mt-0.5">
-            Pijl <span id="currentDartNum" class="font-bold text-emerald-400">1</span> van 3
-          </span>
+        <!-- Huidig Doelwit Cirkel -->
+        <div class="flex items-center justify-around py-2">
+          <div class="flex flex-col">
+            <span class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">HUIDIG DOEL</span>
+            <span id="targetHelperText" class="text-xs sm:text-sm font-semibold text-slate-200 mt-0.5">Raak Single, Double of Triple</span>
+            <span class="text-xs text-slate-400 mt-1">
+              Pijl <span id="currentDartNum" class="font-bold text-amber-400 text-sm">1</span> van 3
+            </span>
+          </div>
+
+          <div id="targetDisplayCircle" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 p-[3px] shadow-xl shadow-amber-500/25 active-target-pulse shrink-0">
+            <div class="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border-2 border-amber-400/50">
+              <span id="currentTargetNum" class="text-2xl sm:text-4xl font-black text-amber-300 font-mono leading-none">--</span>
+              <span id="targetSubLabel" class="text-[9px] font-bold text-amber-500 uppercase tracking-wider mt-0.5">NUMMER</span>
+            </div>
+          </div>
         </div>
 
-        <div class="flex items-center">
-          <div id="targetDisplayCircle" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 p-[3px] shadow-lg shadow-amber-500/20 active-target-pulse">
-            <div class="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border border-amber-400/50">
-              <span id="currentTargetNum" class="text-xl sm:text-2xl font-black text-amber-300 font-mono leading-none">--</span>
-              <span id="targetSubLabel" class="text-[8px] font-bold text-amber-500 uppercase">NUMMER</span>
-            </div>
+        <!-- 3 Pijlen slots -->
+        <div class="flex items-center justify-between bg-slate-950/70 p-2 sm:p-2.5 rounded-xl border border-slate-800">
+          <span class="text-xs text-slate-400 font-semibold">Gegooide pijlen:</span>
+          <div class="flex items-center gap-2">
+            <div id="dartSlot0" class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 border-slate-700 bg-slate-900 flex items-center justify-center font-black text-xs sm:text-sm text-slate-300 font-mono">1</div>
+            <div id="dartSlot1" class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 border-slate-700 bg-slate-900 flex items-center justify-center font-black text-xs sm:text-sm text-slate-300 font-mono">2</div>
+            <div id="dartSlot2" class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 border-slate-700 bg-slate-900 flex items-center justify-center font-black text-xs sm:text-sm text-slate-300 font-mono">3</div>
           </div>
         </div>
       </div>
 
-      <!-- 4 Extra Grote Touch Knoppen voor de huidige worp -->
-      <div class="grid grid-cols-2 gap-2.5 flex-1 min-h-0">
-        <!-- MIS -->
-        <button onclick="registerThrow(0)" class="tap-btn flex-1 min-h-[64px] sm:min-h-[80px] rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700 hover:border-slate-500 text-slate-200 flex flex-col items-center justify-center p-3 shadow-xl active:bg-slate-700">
-          <span class="text-xl sm:text-3xl font-black tracking-wider text-rose-400 flex items-center gap-2 leading-tight">
-            <i class="fa-solid fa-xmark text-lg sm:text-2xl"></i> MIS
+      <!-- RECHTS: Duimknoppen Kolom (Mis, Enkel, Dubbel, Triple, Undo) -->
+      <div class="w-36 sm:w-44 flex flex-col gap-1.5 sm:gap-2 shrink-0">
+        <!-- MIS (0) -->
+        <button onclick="registerThrow(0)" class="tap-btn flex-1 rounded-xl bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700 text-slate-200 flex flex-col items-center justify-center shadow-lg active:bg-slate-700">
+          <span class="text-base sm:text-xl font-black text-rose-400 flex items-center gap-1 leading-tight">
+            <i class="fa-solid fa-xmark text-sm"></i> MIS
           </span>
-          <span class="text-xs sm:text-sm text-slate-400 font-semibold mt-0.5">0 punten</span>
+          <span class="text-[10px] text-slate-400 font-medium">0 pt</span>
         </button>
 
-        <!-- ENKEL -->
-        <button id="btnSingle" onclick="registerThrow(1)" class="tap-btn flex-1 min-h-[64px] sm:min-h-[80px] rounded-2xl bg-gradient-to-b from-emerald-950/80 to-slate-900 border-2 border-emerald-600/70 hover:border-emerald-400 text-emerald-100 flex flex-col items-center justify-center p-3 shadow-xl shadow-emerald-950/30 active:bg-emerald-900">
-          <span id="lblSingle" class="text-xl sm:text-3xl font-black tracking-wider text-emerald-400 leading-tight">ENKEL</span>
-          <span id="subSingle" class="text-xs sm:text-sm text-emerald-300/80 font-semibold mt-0.5">1 punt</span>
+        <!-- ENKEL (1) -->
+        <button id="btnSingle" onclick="registerThrow(1)" class="tap-btn flex-1 rounded-xl bg-gradient-to-b from-emerald-950/80 to-slate-900 border-2 border-emerald-600/70 text-emerald-100 flex flex-col items-center justify-center shadow-lg shadow-emerald-950/20 active:bg-emerald-900">
+          <span id="lblSingle" class="text-base sm:text-xl font-black text-emerald-400 leading-tight">ENKEL</span>
+          <span id="subSingle" class="text-[10px] text-emerald-300/80 font-medium">1 pt</span>
         </button>
 
-        <!-- DUBBEL -->
-        <button id="btnDouble" onclick="registerThrow(2)" class="tap-btn flex-1 min-h-[64px] sm:min-h-[80px] rounded-2xl bg-gradient-to-b from-blue-950/80 to-slate-900 border-2 border-blue-600/70 hover:border-blue-400 text-blue-100 flex flex-col items-center justify-center p-3 shadow-xl shadow-blue-950/30 active:bg-blue-900">
-          <span id="lblDouble" class="text-xl sm:text-3xl font-black tracking-wider text-blue-400 leading-tight">DUBBEL</span>
-          <span id="subDouble" class="text-xs sm:text-sm text-blue-300/80 font-semibold mt-0.5">2 punten</span>
+        <!-- DUBBEL (2) -->
+        <button id="btnDouble" onclick="registerThrow(2)" class="tap-btn flex-1 rounded-xl bg-gradient-to-b from-blue-950/80 to-slate-900 border-2 border-blue-600/70 text-blue-100 flex flex-col items-center justify-center shadow-lg shadow-blue-950/20 active:bg-blue-900">
+          <span id="lblDouble" class="text-base sm:text-xl font-black text-blue-400 leading-tight">DUBBEL</span>
+          <span id="subDouble" class="text-[10px] text-blue-300/80 font-medium">2 pt</span>
         </button>
 
-        <!-- TRIPLE -->
-        <button id="btnTriple" onclick="registerThrow(3)" class="tap-btn flex-1 min-h-[64px] sm:min-h-[80px] rounded-2xl bg-gradient-to-b from-purple-950/80 to-slate-900 border-2 border-purple-600/70 hover:border-purple-400 text-purple-100 flex flex-col items-center justify-center p-3 shadow-xl shadow-purple-950/30 active:bg-purple-900 disabled:opacity-30 disabled:pointer-events-none">
-          <span id="lblTriple" class="text-xl sm:text-3xl font-black tracking-wider text-purple-400 leading-tight">TRIPLE</span>
-          <span id="subTriple" class="text-xs sm:text-sm text-purple-300/80 font-semibold mt-0.5">3 punten</span>
+        <!-- TRIPLE (3) -->
+        <button id="btnTriple" onclick="registerThrow(3)" class="tap-btn flex-1 rounded-xl bg-gradient-to-b from-purple-950/80 to-slate-900 border-2 border-purple-600/70 text-purple-100 flex flex-col items-center justify-center shadow-lg shadow-purple-950/20 active:bg-purple-900 disabled:opacity-30 disabled:pointer-events-none">
+          <span id="lblTriple" class="text-base sm:text-xl font-black text-purple-400 leading-tight">TRIPLE</span>
+          <span id="subTriple" class="text-[10px] text-purple-300/80 font-medium">3 pt</span>
+        </button>
+
+        <!-- UNDO KNOP -->
+        <button id="undoBtn" onclick="undoLastThrow()" class="tap-btn py-2 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 shadow active:scale-95 disabled:opacity-30 disabled:pointer-events-none">
+          <i class="fa-solid fa-arrow-rotate-left text-amber-400"></i>
+          <span>Undo</span>
         </button>
       </div>
 
-      <!-- Undo knop -->
-      <button id="undoBtn" onclick="undoLastThrow()" class="tap-btn w-full py-2.5 sm:py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow shrink-0 active:scale-[0.99] disabled:opacity-30 disabled:pointer-events-none">
-        <i class="fa-solid fa-arrow-rotate-left text-amber-400"></i>
-        <span>Laatste pijl ongedaan maken (Undo)</span>
-      </button>
     </section>
 
-    <!-- 3. Onderin: Resterende nummers (Felle Amber / Gouden weergave) -->
-    <section class="bg-slate-900/90 border border-amber-900/50 rounded-xl p-2 sm:p-2.5 flex flex-col gap-1.5 shrink-0 shadow-lg shadow-amber-950/20">
-      <div class="flex items-center justify-between text-[11px] sm:text-xs px-1 font-bold">
+    <!-- 3. Onderin: Resterende Nummers (Felle Amber / Glow Balk) -->
+    <section class="bg-slate-900/90 border border-amber-900/60 rounded-xl p-2 flex flex-col gap-1 shrink-0 shadow-lg shadow-amber-950/30">
+      <div class="flex items-center justify-between text-[11px] px-1 font-bold">
         <span class="text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
           <i class="fa-solid fa-bullseye text-amber-400"></i> NOG TE GOOIEN NUMMERS
         </span>
-        <span id="targetCounter" class="text-amber-300 font-mono font-black text-xs sm:text-sm bg-amber-950/70 px-2 py-0.5 rounded border border-amber-700/60">1 / 21</span>
+        <span id="targetCounter" class="text-amber-300 font-mono font-black text-xs bg-amber-950/80 px-2 py-0.5 rounded border border-amber-700/80">1 / 21</span>
       </div>
-      <div id="targetsScroller" class="flex gap-1.5 sm:gap-2 overflow-x-auto custom-scroll pb-1 pt-0.5">
-        <!-- Wordt dynamisch gevuld -->
+      <div id="targetsScroller" class="flex gap-1.5 overflow-x-auto custom-scroll pb-1 pt-0.5">
+        <!-- Dynamisch gevuld -->
       </div>
     </section>
 
@@ -288,7 +280,6 @@
         </div>
       </div>
 
-      <!-- Recente Spelers -->
       <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
         <span class="text-[11px] font-semibold text-slate-400 block mb-2">Snel kiezen uit opgeslagen spelers:</span>
         <div id="savedPlayersList" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto"></div>
@@ -343,7 +334,6 @@
   </div>
 
   <script>
-    // --- Spelstatus ---
     let targets = []; 
     let currentTargetIndex = 0; 
     let currentPlayer = 1; 
@@ -419,7 +409,7 @@
         const j = Math.floor(Math.random() * (i + 1));
         [nums[i], nums[j]] = [nums[j], nums[i]];
       }
-      nums.push(25); 
+      nums.push(25); // Finale Bullseye
       return nums;
     }
 
@@ -459,7 +449,7 @@
         const label = isBull ? 'BULL' : num;
         const badge = document.createElement('div');
         badge.id = `target-badge-${idx}`;
-        badge.className = `shrink-0 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-mono font-black border transition-all ${
+        badge.className = `shrink-0 px-3 py-1 rounded-lg text-xs font-mono font-black border transition-all ${
           idx === currentTargetIndex
             ? 'bg-amber-400 text-slate-950 border-white shadow-lg shadow-amber-500/50 scale-110 ring-2 ring-amber-300'
             : idx < currentTargetIndex
@@ -497,28 +487,26 @@
       if (isBull) {
         btnTriple.disabled = true;
         lblSingle.textContent = 'ENKELE BULL';
-        subSingle.textContent = '1 punt (25)';
+        subSingle.textContent = '1 pt (25)';
         lblDouble.textContent = 'DUBBELE BULL';
-        subDouble.textContent = '2 punten (50)';
+        subDouble.textContent = '2 pt (50)';
       } else {
         btnTriple.disabled = false;
         lblSingle.textContent = 'ENKEL';
-        subSingle.textContent = '1 punt';
+        subSingle.textContent = '1 pt';
         lblDouble.textContent = 'DUBBEL';
-        subDouble.textContent = '2 punten';
+        subDouble.textContent = '2 pt';
       }
 
       renderTargetsList();
     }
 
-    function calculateLivePlayerStats(throws) {
-      const total = throws.length;
-      if (total === 0) return { hitRate: '0%', avgHit: '0.0' };
+    // Bereken het gemiddelde per rake pijl
+    function calculateAvgPerHit(throws) {
       const hits = throws.filter(t => t > 0);
-      const hitPointsSum = hits.reduce((a, b) => a + b, 0);
-      const hitRate = Math.round((hits.length / total) * 100) + '%';
-      const avgHit = hits.length > 0 ? (hitPointsSum / hits.length).toFixed(1) : '0.0';
-      return { hitRate, avgHit };
+      if (hits.length === 0) return "0.0";
+      const sum = hits.reduce((a, b) => a + b, 0);
+      return (sum / hits.length).toFixed(1);
     }
 
     function updateUI() {
@@ -528,31 +516,17 @@
       document.getElementById('p1Score').textContent = p1Total;
       document.getElementById('p2Score').textContent = p2Total;
 
-      // Bereken live hit-statistieken
-      const p1Live = calculateLivePlayerStats(p1MatchThrows);
-      const p2Live = calculateLivePlayerStats(p2MatchThrows);
+      // Toon het gemiddelde per rake pijl in de spelerskaarten
+      const p1Avg = calculateAvgPerHit(p1MatchThrows);
+      const p2Avg = calculateAvgPerHit(p2MatchThrows);
+      document.getElementById('p1AvgHit').innerHTML = `Gem. raak: <span class="font-bold text-white">${p1Avg}</span> pt`;
+      document.getElementById('p2AvgHit').innerHTML = `Gem. raak: <span class="font-bold text-white">${p2Avg}</span> pt`;
 
-      document.getElementById('p1HitRateBadge').textContent = `${p1Live.hitRate} raak`;
-      document.getElementById('p2HitRateBadge').textContent = `${p2Live.hitRate} raak`;
-
-      document.getElementById('p1AvgHit').innerHTML = `Ø Gem: <span class="text-emerald-400 font-bold">${p1Live.avgHit}</span> pt/raak`;
-      document.getElementById('p2AvgHit').innerHTML = `Ø Gem: <span class="text-cyan-400 font-bold">${p2Live.avgHit}</span> pt/raak`;
-
-      // Update Vorige Worp Weergave
+      // Vorige worp
       const p1LastEl = document.getElementById('p1LastTurn');
       const p2LastEl = document.getElementById('p2LastTurn');
-
-      if (p1LastTurnScore !== null) {
-        p1LastEl.textContent = `Vorige: +${p1LastTurnScore} pt`;
-      } else {
-        p1LastEl.textContent = `Vorige: -`;
-      }
-
-      if (p2LastTurnScore !== null) {
-        p2LastEl.textContent = `Vorige: +${p2LastTurnScore} pt`;
-      } else {
-        p2LastEl.textContent = `Vorige: -`;
-      }
+      p1LastEl.textContent = p1LastTurnScore !== null ? `Vorige: +${p1LastTurnScore} pt` : `Vorige: -`;
+      p2LastEl.textContent = p2LastTurnScore !== null ? `Vorige: +${p2LastTurnScore} pt` : `Vorige: -`;
 
       // Actieve speler indicators & randen
       const p1Card = document.getElementById('p1Card');
@@ -568,7 +542,7 @@
         p1Ind.classList.remove('hidden');
         p2Ind.classList.add('hidden');
         document.getElementById('currentTurnPlayer').textContent = player1Name;
-        document.getElementById('currentTurnPlayer').className = 'text-emerald-400 font-bold';
+        document.getElementById('currentTurnPlayer').className = 'text-lg sm:text-xl font-black text-emerald-400';
       } else {
         p2Card.classList.add('border-cyan-500', 'bg-slate-900');
         p2Card.classList.remove('border-transparent', 'opacity-70');
@@ -577,7 +551,7 @@
         p2Ind.classList.remove('hidden');
         p1Ind.classList.add('hidden');
         document.getElementById('currentTurnPlayer').textContent = player2Name;
-        document.getElementById('currentTurnPlayer').className = 'text-cyan-400 font-bold';
+        document.getElementById('currentTurnPlayer').className = 'text-lg sm:text-xl font-black text-cyan-400';
       }
 
       // 3-darts slots weergave
@@ -588,13 +562,13 @@
           const val = activeThrows[i];
           const text = val === 0 ? 'M' : val === 1 ? '1x' : val === 2 ? '2x' : '3x';
           const color = val === 0 ? 'text-rose-400 border-rose-800 bg-rose-950/40' : 'text-emerald-400 border-emerald-700 bg-emerald-950/40';
-          slot.className = `w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 flex items-center justify-center font-bold text-xs font-mono ${color}`;
+          slot.className = `w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 flex items-center justify-center font-black text-xs sm:text-sm font-mono ${color}`;
           slot.textContent = text;
         } else if (i === activeThrows.length) {
-          slot.className = 'w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 border-emerald-500 bg-slate-900 flex items-center justify-center font-bold text-xs text-white font-mono animate-pulse';
+          slot.className = 'w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 border-emerald-500 bg-slate-900 flex items-center justify-center font-black text-xs sm:text-sm text-white font-mono animate-pulse';
           slot.textContent = i + 1;
         } else {
-          slot.className = 'w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 border-slate-800 bg-slate-950 flex items-center justify-center font-bold text-xs text-slate-600 font-mono';
+          slot.className = 'w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 border-slate-800 bg-slate-950 flex items-center justify-center font-black text-xs sm:text-sm text-slate-600 font-mono';
           slot.textContent = i + 1;
         }
       }
