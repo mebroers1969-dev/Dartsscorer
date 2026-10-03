@@ -1,1371 +1,890 @@
 <!DOCTYPE html>
-<html lang="nl" class="h-full overflow-hidden">
+<html lang="nl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Dart Master - Round the Board (3 Pijlen)</title>
-  <meta name="theme-color" content="#070a13">
+  <title>Round The Board Darts</title>
+  
+  <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="DartMaster RTB">
+  <meta name="apple-mobile-web-app-title" content="Darts RTB">
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-  <script>
-    const pwaManifest = {
-      name: "Darts Round the Board (3 Pijlen)",
-      short_name: "DartStats RTB",
-      start_url: ".",
-      display: "standalone",
-      orientation: "any",
-      background_color: "#070a13",
-      theme_color: "#0f172a",
-      icons: [
-        {
-          src: "https://placehold.co/192x192/0f172a/22c55e.png?text=RTB+DARTS",
-          sizes: "192x192",
-          type: "image/png"
-        },
-        {
-          src: "https://placehold.co/512x512/0f172a/22c55e.png?text=RTB+DARTS",
-          sizes: "512x512",
-          type: "image/png"
-        }
-      ]
-    };
-    const manifestBlob = new Blob([JSON.stringify(pwaManifest)], { type: 'application/json' });
-    const manifestURL = URL.createObjectURL(manifestBlob);
-    const linkTag = document.createElement('link');
-    linkTag.rel = 'manifest';
-    linkTag.href = manifestURL;
-    document.head.appendChild(linkTag);
-  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
-
-    * {
-      touch-action: manipulation;
-      box-sizing: border-box;
+    :root {
+      --app-height: 100dvh;
     }
-
     html, body {
       height: 100%;
-      height: 100dvh;
-      max-height: 100dvh;
-      width: 100%;
-      overflow: hidden;
+      height: var(--app-height);
       margin: 0;
       padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      user-select: none;
+      overflow: hidden;
+      touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
-      background-color: #070a13;
+      user-select: none;
     }
-
-    .font-darts {
-      font-family: 'Teko', sans-serif;
-      letter-spacing: 0.02em;
-    }
-
-    .glow-cyan {
-      box-shadow: 0 0 20px -2px rgba(6, 182, 212, 0.4), inset 0 0 12px -4px rgba(6, 182, 212, 0.2);
-    }
-    .glow-amber {
-      box-shadow: 0 0 20px -2px rgba(245, 158, 11, 0.4), inset 0 0 12px -4px rgba(245, 158, 11, 0.2);
-    }
-    .glow-target {
-      box-shadow: 0 0 25px 2px rgba(239, 68, 68, 0.45);
-    }
-
-    .targets-scroll::-webkit-scrollbar {
-      height: 3px;
-    }
-    .targets-scroll::-webkit-scrollbar-track {
-      background: #111827;
-      border-radius: 9999px;
-    }
-    .targets-scroll::-webkit-scrollbar-thumb {
-      background: #374151;
-      border-radius: 9999px;
-    }
-
-    .btn-press {
-      transition: transform 0.06s ease, filter 0.1s ease;
-    }
-    .btn-press:active {
+    .tap-btn:active {
       transform: scale(0.97);
     }
-
-    @keyframes pulseDart {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.04); opacity: 0.85; }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
     }
-    .dart-active-pulse {
-      animation: pulseDart 1.1s infinite ease-in-out;
+    .active-turn-pulse {
+      animation: pulse-ring 2s infinite ease-in-out;
     }
-
-    /* Landscape Tablet Zero-Scroll Architecture */
-    @media (orientation: landscape) {
-      .app-layout-split {
-        display: grid;
-        grid-template-columns: 1.05fr 1fr;
-        gap: 0.75rem;
-        height: 100%;
-        min-height: 0;
-        max-height: 100%;
-        overflow: hidden;
-      }
-      .panel-left-content {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 100%;
-        min-height: 0;
-        gap: 0.45rem;
-      }
-      .panel-right-content {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 100%;
-        min-height: 0;
-        gap: 0.45rem;
-      }
-      .button-grid-dynamic {
-        flex: 1 1 0%;
-        min-height: 0;
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-rows: repeat(2, minmax(0, 1fr));
-        gap: 0.5rem;
-      }
+    .custom-scroll::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
     }
-
-    /* Portrait adjustments */
-    @media (orientation: portrait) {
-      .app-layout-split {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 100%;
-        min-height: 0;
-        gap: 0.5rem;
-        overflow-y: auto;
-      }
-      .button-grid-dynamic {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.5rem;
-      }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 9999px;
     }
   </style>
 </head>
-<body class="text-slate-100 flex flex-col bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0a0f1d] to-[#04060b]">
+<body class="bg-slate-950 text-slate-100 flex flex-col font-sans select-none antialiased">
 
-  <!-- COMPACT TOP NAVBAR (GEEN RUIMTEVERSPILLING) -->
-  <header class="w-full bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 py-1.5 sm:py-2 flex items-center justify-between shrink-0 z-40">
+  <!-- Header -->
+  <header class="bg-slate-900 border-b border-slate-800 px-3 py-2 flex items-center justify-between shrink-0 z-10">
     <div class="flex items-center gap-2">
-      <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 flex items-center justify-center shadow-md shadow-red-500/25 shrink-0">
-        <i class="fa-solid fa-bullseye text-white text-xs sm:text-sm"></i>
+      <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-900/40">
+        <i class="fa-solid fa-bullseye text-sm"></i>
       </div>
       <div>
-        <h1 class="font-bold text-xs sm:text-sm md:text-base tracking-wide flex items-center gap-1.5 leading-none">
-          ROUND THE BOARD
-          <span class="text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold">3 PIJLEN</span>
+        <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-1 leading-tight">
+          Round The Board
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 rounded font-semibold uppercase tracking-wider">3 Darts</span>
         </h1>
-        <p class="text-[9px] text-slate-400 leading-tight">1-20 willekeurig + Bullseye finale</p>
+        <p class="text-[10px] text-slate-400 leading-tight">Willekeurig 1-20 & Bull</p>
       </div>
     </div>
 
-    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-      <!-- Live Stats knop -->
-      <button onclick="openStatsModal(false)" class="px-2 py-1 rounded-lg text-xs font-semibold border border-purple-500/40 bg-purple-950/40 text-purple-300 hover:bg-purple-900/60 hover:text-white flex items-center gap-1 transition">
-        <i class="fa-solid fa-chart-pie text-purple-400"></i>
-        <span class="hidden sm:inline">Stats</span>
+    <!-- Actieknoppen -->
+    <div class="flex items-center gap-1.5">
+      <button onclick="openStatsModal()" class="tap-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium border border-slate-700 flex items-center gap-1">
+        <i class="fa-solid fa-chart-pie text-cyan-400"></i>
+        <span>Stats</span>
       </button>
 
-      <!-- WakeLock knop -->
-      <button id="wakelockBtn" onclick="toggleWakeLock()" class="px-2 py-1 rounded-lg text-xs font-medium border border-slate-700/80 bg-slate-800/90 text-slate-300 hover:text-white flex items-center gap-1 transition" title="Houd scherm continu actief">
-        <i class="fa-solid fa-lightbulb text-slate-400 text-xs" id="wakelockIcon"></i>
-        <span class="hidden md:inline" id="wakelockText">Scherm aan</span>
+      <button id="wakeLockBtn" onclick="toggleWakeLock()" class="tap-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium border border-slate-700 flex items-center gap-1">
+        <i id="wakeLockIcon" class="fa-regular fa-lightbulb text-amber-400"></i>
+        <span id="wakeLockText">Scherm Aan</span>
       </button>
 
-      <!-- Geluid/Trillen knop -->
-      <button id="soundBtn" onclick="toggleAudio()" class="p-1.5 sm:p-2 rounded-lg text-slate-300 bg-slate-800/90 border border-slate-700/80 hover:text-white transition" title="Geluid en trillen">
-        <i class="fa-solid fa-volume-high text-xs sm:text-sm" id="soundIcon"></i>
-      </button>
-
-      <!-- Spelers Beheer knop -->
-      <button onclick="openSettingsModal()" class="p-1.5 sm:p-2 rounded-lg text-amber-400 bg-slate-800/90 border border-slate-700/80 hover:text-amber-300 transition" title="Spelers wisselen / bewerken">
-        <i class="fa-solid fa-users-gear text-xs sm:text-sm"></i>
-      </button>
-
-      <!-- Direct Nieuw Potje Knop -->
-      <button onclick="openRestartModal()" class="px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold border border-cyan-500/50 bg-cyan-950/50 text-cyan-300 hover:bg-cyan-900/60 hover:text-white flex items-center gap-1 transition shadow-sm">
-        <i class="fa-solid fa-rotate-right text-cyan-400"></i>
+      <button onclick="confirmNewGame()" class="tap-btn px-2.5 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 text-xs font-semibold border border-rose-800/60 flex items-center gap-1">
+        <i class="fa-solid fa-rotate-left"></i>
         <span>Nieuw</span>
+      </button>
+
+      <button onclick="openPlayerModal()" class="tap-btn p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+        <i class="fa-solid fa-user-pen text-xs"></i>
       </button>
     </div>
   </header>
 
-  <!-- HOOFDCONTAINER: STRIKT BINNEN SCHERMHOOGTE -->
-  <main class="flex-1 w-full max-w-7xl mx-auto p-2 sm:p-3 min-h-0 overflow-hidden app-layout-split">
-
-    <!-- LINKER KOLOM: MATCH-, SPELER- & BEURT-OVERZICHT -->
-    <section class="panel-left-content min-h-0">
+  <!-- Hoofdvenster -->
+  <main class="flex-1 flex flex-col lg:flex-row overflow-hidden p-2 gap-2 min-h-0">
+    
+    <!-- Linkerpaneel: Spelers & Voortgang -->
+    <section class="flex flex-col lg:w-1/2 gap-2 shrink-0 lg:shrink min-h-0">
       
-      <!-- SPELERS SCORE CARDS -->
-      <div class="grid grid-cols-2 gap-2 shrink-0">
-        <!-- Speler 1 Card -->
-        <div id="p1Card" class="relative rounded-xl border-2 transition-all duration-200 p-2 sm:p-2.5 bg-slate-900/90 overflow-hidden flex flex-col justify-between shadow-md">
-          <div id="p1TurnIndicator" class="absolute top-0 right-0 left-0 h-1 bg-cyan-400 hidden"></div>
-          <div class="flex justify-between items-start gap-1">
-            <div class="truncate flex-1">
-              <span class="text-[9px] uppercase tracking-wider font-semibold text-cyan-400 flex items-center gap-1 leading-none">
-                Speler 1
-                <span id="p1Badge" class="hidden text-[7px] bg-cyan-500/25 text-cyan-300 px-1 py-0.2 rounded-full font-bold">BEURT</span>
-              </span>
-              <div class="flex items-center gap-1 mt-0.5">
-                <span id="p1Name" class="font-bold text-sm sm:text-base text-slate-100 truncate cursor-pointer hover:text-cyan-300 transition" onclick="openSettingsModal()">Speler 1</span>
-                <button onclick="openSettingsModal()" class="text-slate-500 hover:text-cyan-400 text-[10px]">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-              </div>
-            </div>
-            <div class="bg-slate-800/90 border border-slate-700 px-1.5 py-0.5 rounded text-right shrink-0">
-              <span class="text-[8px] block text-slate-400 uppercase leading-none font-bold">Sets</span>
-              <span id="p1Wins" class="text-xs font-bold text-amber-400">0</span>
-            </div>
+      <!-- Spelerskaarten (Groter, met vorige beurt score) -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <!-- Speler 1 Kaart -->
+        <div id="p1Card" onclick="openPlayerModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-slate-900/90 p-3 sm:p-4 flex flex-col justify-between shadow-lg min-h-[115px] sm:min-h-[135px]">
+          <div class="flex items-center justify-between">
+            <span id="p1NameDisplay" class="font-bold text-sm sm:text-base tracking-wide truncate max-w-[110px] sm:max-w-[150px] text-white">Speler 1</span>
+            <span id="p1SetsBadge" class="text-[11px] bg-slate-800/90 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700/80 font-semibold font-mono">Sets: 0</span>
           </div>
 
           <div class="flex items-baseline justify-between mt-1">
-            <div class="flex flex-col">
-              <span class="text-[9px] text-slate-400 font-medium uppercase leading-tight">Punten</span>
-              <span id="p1HitRateQuick" class="text-[9px] sm:text-[10px] text-emerald-400 font-semibold font-mono">0% raak</span>
+            <div>
+              <div id="p1Score" class="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono leading-none">0</div>
+              <div class="text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-semibold">Totaal Punten</div>
             </div>
-            <span id="p1Score" class="font-darts text-4xl sm:text-5xl text-cyan-300 leading-none">0</span>
+            <!-- Vorige beurt score badge -->
+            <div class="text-right">
+              <div id="p1LastTurn" class="text-xs sm:text-sm font-semibold text-emerald-400 font-mono bg-emerald-950/60 px-2 py-1 rounded-lg border border-emerald-800/50">Vorige: -</div>
+            </div>
           </div>
+
+          <div id="p1TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-cyan-400"></div>
         </div>
 
-        <!-- Speler 2 Card -->
-        <div id="p2Card" class="relative rounded-xl border-2 transition-all duration-200 p-2 sm:p-2.5 bg-slate-900/90 overflow-hidden flex flex-col justify-between shadow-md">
-          <div id="p2TurnIndicator" class="absolute top-0 right-0 left-0 h-1 bg-amber-400 hidden"></div>
-          <div class="flex justify-between items-start gap-1">
-            <div class="truncate flex-1">
-              <span class="text-[9px] uppercase tracking-wider font-semibold text-amber-400 flex items-center gap-1 leading-none">
-                Speler 2
-                <span id="p2Badge" class="hidden text-[7px] bg-amber-500/25 text-amber-300 px-1 py-0.2 rounded-full font-bold">BEURT</span>
-              </span>
-              <div class="flex items-center gap-1 mt-0.5">
-                <span id="p2Name" class="font-bold text-sm sm:text-base text-slate-100 truncate cursor-pointer hover:text-amber-300 transition" onclick="openSettingsModal()">Speler 2</span>
-                <button onclick="openSettingsModal()" class="text-slate-500 hover:text-amber-400 text-[10px]">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-              </div>
-            </div>
-            <div class="bg-slate-800/90 border border-slate-700 px-1.5 py-0.5 rounded text-right shrink-0">
-              <span class="text-[8px] block text-slate-400 uppercase leading-none font-bold">Sets</span>
-              <span id="p2Wins" class="text-xs font-bold text-amber-400">0</span>
-            </div>
+        <!-- Speler 2 Kaart -->
+        <div id="p2Card" onclick="openPlayerModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-slate-900/90 p-3 sm:p-4 flex flex-col justify-between shadow-lg min-h-[115px] sm:min-h-[135px]">
+          <div class="flex items-center justify-between">
+            <span id="p2NameDisplay" class="font-bold text-sm sm:text-base tracking-wide truncate max-w-[110px] sm:max-w-[150px] text-white">Speler 2</span>
+            <span id="p2SetsBadge" class="text-[11px] bg-slate-800/90 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700/80 font-semibold font-mono">Sets: 0</span>
           </div>
 
           <div class="flex items-baseline justify-between mt-1">
-            <div class="flex flex-col">
-              <span class="text-[9px] text-slate-400 font-medium uppercase leading-tight">Punten</span>
-              <span id="p2HitRateQuick" class="text-[9px] sm:text-[10px] text-emerald-400 font-semibold font-mono">0% raak</span>
+            <div>
+              <div id="p2Score" class="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono leading-none">0</div>
+              <div class="text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-semibold">Totaal Punten</div>
             </div>
-            <span id="p2Score" class="font-darts text-4xl sm:text-5xl text-amber-300 leading-none">0</span>
+            <!-- Vorige beurt score badge -->
+            <div class="text-right">
+              <div id="p2LastTurn" class="text-xs sm:text-sm font-semibold text-cyan-400 font-mono bg-cyan-950/60 px-2 py-1 rounded-lg border border-cyan-800/50">Vorige: -</div>
+            </div>
+          </div>
+
+          <div id="p2TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-400"></div>
+        </div>
+      </div>
+
+      <!-- Huidige Beurt: 3 Pijlen Tracker -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+              Aan de beurt: <span id="currentTurnPlayer" class="text-emerald-400 font-bold">Speler 1</span>
+            </span>
+            <span class="text-[11px] text-slate-400">Gooi 3 pijlen op het doelwit</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- 3 Pijl slots -->
+          <div class="flex items-center gap-1.5">
+            <div id="dartSlot0" class="w-8 h-8 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center font-bold text-xs text-slate-300 font-mono">1</div>
+            <div id="dartSlot1" class="w-8 h-8 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center font-bold text-xs text-slate-300 font-mono">2</div>
+            <div id="dartSlot2" class="w-8 h-8 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center font-bold text-xs text-slate-300 font-mono">3</div>
+          </div>
+          <div id="turnPointsBadge" class="bg-slate-800 px-2 py-1 rounded-md text-xs font-mono font-bold text-emerald-300 min-w-[42px] text-center border border-slate-700">
+            +0 pt
           </div>
         </div>
       </div>
 
-      <!-- 3-PIJLEN BEURT TRACKER BOX (COMPACT & DUIDELIJK) -->
-      <div class="w-full bg-slate-900/85 border border-slate-800 rounded-xl p-2 sm:p-2.5 flex flex-col gap-1 shadow-sm shrink-0">
-        <div class="flex items-center justify-between text-xs font-semibold px-0.5">
-          <span class="text-slate-300 flex items-center gap-1">
-            <i class="fa-solid fa-arrows-to-dot text-cyan-400 text-[11px]"></i>
-            Huidige Beurt (<span id="currentDartCountText" class="text-white font-bold">Pijl 1 van 3</span>)
+      <!-- Getallenbalk (Felle amber/goud kleur voor betere zichtbaarheid) -->
+      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-2 flex flex-col gap-1.5 shrink-0">
+        <div class="flex items-center justify-between text-[11px] px-1 font-semibold">
+          <span class="text-amber-400 uppercase tracking-wider flex items-center gap-1">
+            <i class="fa-solid fa-list-ol text-[10px]"></i> Resterende Nummers
           </span>
-          <span class="text-slate-300 text-xs">
-            Beurt Score: <span id="turnTotalScore" class="font-bold text-emerald-400 font-mono text-sm">+0</span>
-          </span>
+          <span id="targetCounter" class="text-amber-300 font-mono font-bold">1 / 21</span>
         </div>
-
-        <div class="grid grid-cols-3 gap-1.5">
-          <!-- Dart 1 -->
-          <div id="slotDart0" class="dart-slot flex flex-col items-center justify-center py-1.5 px-1 rounded-lg border border-slate-800 bg-slate-950/70 transition-all">
-            <span class="text-[8px] uppercase font-bold text-slate-400 flex items-center gap-1">
-              <i class="fa-solid fa-location-arrow text-[7px] rotate-45"></i> Pijl 1
-            </span>
-            <span id="slotVal0" class="text-xs font-bold text-slate-500 mt-0.5">-</span>
-          </div>
-
-          <!-- Dart 2 -->
-          <div id="slotDart1" class="dart-slot flex flex-col items-center justify-center py-1.5 px-1 rounded-lg border border-slate-800 bg-slate-950/70 transition-all">
-            <span class="text-[8px] uppercase font-bold text-slate-400 flex items-center gap-1">
-              <i class="fa-solid fa-location-arrow text-[7px] rotate-45"></i> Pijl 2
-            </span>
-            <span id="slotVal1" class="text-xs font-bold text-slate-500 mt-0.5">-</span>
-          </div>
-
-          <!-- Dart 3 -->
-          <div id="slotDart2" class="dart-slot flex flex-col items-center justify-center py-1.5 px-1 rounded-lg border border-slate-800 bg-slate-950/70 transition-all">
-            <span class="text-[8px] uppercase font-bold text-slate-400 flex items-center gap-1">
-              <i class="fa-solid fa-location-arrow text-[7px] rotate-45"></i> Pijl 3
-            </span>
-            <span id="slotVal2" class="text-xs font-bold text-slate-500 mt-0.5">-</span>
-          </div>
+        <div id="targetsScroller" class="flex gap-1.5 overflow-x-auto custom-scroll pb-1 pt-0.5">
+          <!-- Dynamisch gevuld met felle badges -->
         </div>
       </div>
-
-      <!-- HORIZONTALE VOLGORDE SCROLLER -->
-      <div class="w-full bg-slate-900/60 border border-slate-800/80 rounded-xl p-2 shrink-0">
-        <div class="text-[9px] text-slate-400 mb-1 flex justify-between font-semibold">
-          <span>PARCOURS (1 T/M 20 + BULL)</span>
-          <span class="text-emerald-400 font-mono text-[9px]">DOEL <span id="targetIndexDisplay">1</span> / 21</span>
-        </div>
-        <div id="targetsCarousel" class="targets-scroll flex items-center gap-1.5 overflow-x-auto py-0.5 px-0.5 scroll-smooth w-full">
-          <!-- Dynamisch gegenereerd -->
-        </div>
-      </div>
-
+      
     </section>
 
-    <!-- RECHTER KOLOM: DOELWIT & DYNAMISCH SCHALENDE SCORE-KNOPPEN -->
-    <section class="panel-right-content min-h-0">
+    <!-- Rechterpaneel: Doelwit & Grote Scoring-knoppen -->
+    <section class="flex flex-col flex-1 lg:w-1/2 gap-2 min-h-0 justify-between">
       
-      <!-- COMPACT DOELWIT SCHILD (SCHAALT MEE, NIET TE HOOG) -->
-      <div class="bg-slate-900/85 border border-slate-800/90 rounded-xl p-2 sm:p-2.5 flex items-center justify-between relative overflow-hidden shadow-lg shrink-0">
-        <div class="flex flex-col">
-          <span class="text-[9px] uppercase tracking-widest text-slate-400 font-semibold flex items-center gap-1">
-            <i class="fa-solid fa-crosshairs text-red-500"></i> Huidig Doelwit
-          </span>
-          <div class="text-xs font-semibold text-slate-300 mt-0.5">
-            Aan beurt: <span id="activePlayerLabel" class="text-cyan-400 font-bold">Speler 1</span>
+      <!-- Huidig Doelwit Display -->
+      <div class="relative bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-slate-800 rounded-2xl p-2 sm:p-3 flex items-center justify-between shadow-2xl shrink-0 overflow-hidden">
+        <div class="flex flex-col z-10 pl-2">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">HUIDIG DOELWIT</span>
+          <span id="targetHelperText" class="text-xs text-slate-300 mt-0.5">Raak Single, Double of Triple</span>
+          <div class="mt-1 flex items-center gap-2">
+            <span class="inline-flex items-center text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">
+              Pijl <span id="currentDartNum" class="font-bold text-emerald-400 mx-1">1</span> van 3
+            </span>
           </div>
-          <span id="targetSubtext" class="text-[9px] text-slate-400 mt-0.5">Gooi 3 pijlen op dit getal</span>
         </div>
 
-        <!-- Target Cirkel -->
-        <div class="flex items-center">
-          <div id="targetDisplayBox" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-red-500/80 bg-gradient-to-b from-slate-800 to-slate-950 flex flex-col items-center justify-center glow-target shadow-md">
-            <span class="text-[8px] font-bold text-red-400 uppercase leading-none -mb-0.5">Gooi</span>
-            <span id="currentTargetDisplay" class="font-darts text-4xl sm:text-5xl leading-none text-white font-bold drop-shadow">18</span>
+        <div class="flex items-center justify-center pr-2 z-10">
+          <div id="targetDisplayCircle" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 p-[3px] shadow-xl shadow-amber-500/20 active-turn-pulse">
+            <div class="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border-2 border-amber-400/40">
+              <span id="currentTargetNum" class="text-2xl sm:text-3xl font-black text-amber-300 font-mono tracking-tight leading-none">--</span>
+              <span id="targetSubLabel" class="text-[9px] font-bold text-amber-500/90 tracking-wider uppercase mt-0.5">NUMMER</span>
+            </div>
           </div>
         </div>
+
+        <!-- Subtiele achtergronddecoratie -->
+        <i class="fa-solid fa-bullseye absolute -right-6 -bottom-6 text-7xl text-slate-800/20 pointer-events-none"></i>
       </div>
 
-      <!-- 4 GROTE SCOREDRUKKNOPPEN: DYNAMISCH FLEX-VULLEND BINNEN DE HOOGTE -->
-      <div class="button-grid-dynamic">
+      <!-- 4 Grote Invoerknoppen (Flex-1 schalen mee zonder scrollen) -->
+      <div class="grid grid-cols-2 gap-2 flex-1 min-h-0">
         <!-- MIS (0 pt) -->
-        <button onclick="registerDart(0)" class="btn-press rounded-xl bg-gradient-to-b from-slate-700 to-slate-800 border-2 border-slate-600 shadow-md text-white font-bold flex flex-col items-center justify-center hover:from-slate-600 hover:to-slate-700 transition p-2 min-h-0">
-          <span class="font-darts text-2xl sm:text-3xl lg:text-4xl text-slate-300 leading-none">MIS</span>
-          <span class="text-[9px] sm:text-[10px] text-slate-400 font-semibold tracking-wide">0 Punten</span>
+        <button onclick="registerThrow(0)" class="tap-btn flex-1 min-h-[55px] rounded-xl bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700/80 hover:border-slate-500 text-slate-200 flex flex-col items-center justify-center p-2 shadow-lg transition-all active:bg-slate-700">
+          <span class="text-lg sm:text-2xl font-black tracking-wider text-rose-400 flex items-center gap-1.5 leading-tight">
+            <i class="fa-solid fa-xmark text-sm sm:text-base"></i> MIS
+          </span>
+          <span class="text-[11px] text-slate-400 font-medium">0 punten</span>
         </button>
 
         <!-- ENKEL (1 pt) -->
-        <button onclick="registerDart(1)" class="btn-press rounded-xl bg-gradient-to-b from-emerald-600 to-emerald-800 border-2 border-emerald-400 shadow-md shadow-emerald-950/40 text-white font-bold flex flex-col items-center justify-center hover:from-emerald-500 hover:to-emerald-700 transition p-2 min-h-0">
-          <span id="labelSingle" class="font-darts text-2xl sm:text-3xl lg:text-4xl leading-none">ENKEL</span>
-          <span class="text-[9px] sm:text-[10px] text-emerald-200 font-semibold tracking-wide">+1 Punt</span>
+        <button id="btnSingle" onclick="registerThrow(1)" class="tap-btn flex-1 min-h-[55px] rounded-xl bg-gradient-to-b from-emerald-950/80 to-slate-900 border-2 border-emerald-600/70 hover:border-emerald-400 text-emerald-100 flex flex-col items-center justify-center p-2 shadow-lg shadow-emerald-950/30 transition-all active:bg-emerald-900">
+          <span id="lblSingle" class="text-lg sm:text-2xl font-black tracking-wider text-emerald-400 leading-tight">ENKEL</span>
+          <span id="subSingle" class="text-[11px] text-emerald-300/80 font-medium">1 punt</span>
         </button>
 
         <!-- DUBBEL (2 pt) -->
-        <button onclick="registerDart(2)" class="btn-press rounded-xl bg-gradient-to-b from-blue-600 to-blue-800 border-2 border-blue-400 shadow-md shadow-blue-950/40 text-white font-bold flex flex-col items-center justify-center hover:from-blue-500 hover:to-blue-700 transition p-2 min-h-0">
-          <span id="labelDouble" class="font-darts text-2xl sm:text-3xl lg:text-4xl leading-none">DUBBEL</span>
-          <span class="text-[9px] sm:text-[10px] text-blue-200 font-semibold tracking-wide">+2 Punten</span>
+        <button id="btnDouble" onclick="registerThrow(2)" class="tap-btn flex-1 min-h-[55px] rounded-xl bg-gradient-to-b from-blue-950/80 to-slate-900 border-2 border-blue-600/70 hover:border-blue-400 text-blue-100 flex flex-col items-center justify-center p-2 shadow-lg shadow-blue-950/30 transition-all active:bg-blue-900">
+          <span id="lblDouble" class="text-lg sm:text-2xl font-black tracking-wider text-blue-400 leading-tight">DUBBEL</span>
+          <span id="subDouble" class="text-[11px] text-blue-300/80 font-medium">2 punten</span>
         </button>
 
         <!-- TRIPLE (3 pt) -->
-        <button id="btnTriple" onclick="registerDart(3)" class="btn-press rounded-xl bg-gradient-to-b from-amber-500 to-amber-700 border-2 border-amber-400 shadow-md shadow-amber-950/40 text-white font-bold flex flex-col items-center justify-center hover:from-amber-400 hover:to-amber-600 transition disabled:opacity-20 disabled:pointer-events-none p-2 min-h-0">
-          <span class="font-darts text-2xl sm:text-3xl lg:text-4xl leading-none">TRIPLE</span>
-          <span class="text-[9px] sm:text-[10px] text-amber-200 font-semibold tracking-wide">+3 Punten</span>
+        <button id="btnTriple" onclick="registerThrow(3)" class="tap-btn flex-1 min-h-[55px] rounded-xl bg-gradient-to-b from-purple-950/80 to-slate-900 border-2 border-purple-600/70 hover:border-purple-400 text-purple-100 flex flex-col items-center justify-center p-2 shadow-lg shadow-purple-950/30 transition-all active:bg-purple-900 disabled:opacity-30 disabled:pointer-events-none">
+          <span id="lblTriple" class="text-lg sm:text-2xl font-black tracking-wider text-purple-400 leading-tight">TRIPLE</span>
+          <span id="subTriple" class="text-[11px] text-purple-300/80 font-medium">3 punten</span>
         </button>
       </div>
 
-      <!-- UNDO & NIEUW POTJE BALK (VASTE COMPACTE HOOGTE) -->
-      <div class="grid grid-cols-2 gap-2 shrink-0">
-        <button id="btnUndo" onclick="undoLastDart()" class="btn-press py-2 px-2.5 rounded-xl bg-slate-800/95 border border-slate-700 text-slate-300 font-semibold flex items-center justify-center gap-1.5 hover:bg-slate-700 hover:text-white transition disabled:opacity-25 disabled:pointer-events-none text-xs">
+      <!-- Onderbalk: Undo Knop -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="undoBtn" onclick="undoLastThrow()" class="tap-btn w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-300 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow transition-all active:scale-[0.99] disabled:opacity-40 disabled:pointer-events-none">
           <i class="fa-solid fa-arrow-rotate-left text-amber-400"></i>
-          <span>Worp wissen</span>
-        </button>
-
-        <button onclick="openRestartModal()" class="btn-press py-2 px-2.5 rounded-xl bg-gradient-to-r from-cyan-950/80 to-slate-800 border border-cyan-500/60 text-cyan-300 font-bold flex items-center justify-center gap-1.5 hover:from-cyan-900 hover:to-slate-700 hover:text-white transition text-xs shadow-sm">
-          <i class="fa-solid fa-play text-cyan-400"></i>
-          <span>Nieuw Potje</span>
+          <span>Laatste pijl ongedaan maken (Undo)</span>
         </button>
       </div>
 
     </section>
-
   </main>
 
-  <!-- STATISTIEKEN MODAL (VOLLIG SCROLLBAAR BINNEN HET VENSTER) -->
-  <div id="statsModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 overflow-y-auto hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-4 sm:p-5 text-center shadow-2xl flex flex-col my-auto max-h-[92dvh]">
-      
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/40 flex items-center justify-center text-sm">
-            <i class="fa-solid fa-chart-column"></i>
-          </div>
-          <div class="text-left">
-            <h2 id="statsModalTitle" class="text-sm sm:text-base font-black text-white uppercase tracking-wider leading-tight">Wedstrijd Statistieken</h2>
-            <p id="statsModalSubtitle" class="text-[10px] text-slate-400">Analyse van alle gegooide pijlen</p>
-          </div>
+  <!-- Modals -->
+
+  <!-- Modal: Spelers Beheren -->
+  <div id="playerModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-5 shadow-2xl flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-user-group text-emerald-400"></i> Spelers Aanpassen
+        </h3>
+        <button onclick="closePlayerModal()" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-400 block mb-1">Naam Speler 1</label>
+          <input type="text" id="p1Input" maxlength="16" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-medium focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div class="flex justify-center my-0.5">
+          <button onclick="swapPlayers()" class="tap-btn px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-arrows-up-down text-emerald-400"></i> Wissel Volgorde
+          </button>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-400 block mb-1">Naam Speler 2</label>
+          <input type="text" id="p2Input" maxlength="16" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-medium focus:outline-none focus:border-cyan-500">
+        </div>
+      </div>
+
+      <!-- Recente Spelers -->
+      <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+        <span class="text-[11px] font-semibold text-slate-400 block mb-2">Snel kiezen uit opgeslagen spelers:</span>
+        <div id="savedPlayersList" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto"></div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="closePlayerModal()" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Annuleren</button>
+        <button onclick="savePlayerNames()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-950">Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Statistieken -->
+  <div id="statsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-4 sm:p-5 shadow-2xl flex flex-col gap-3 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <div>
+          <h3 id="statsTitle" class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-chart-simple text-cyan-400"></i> Statistieken
+          </h3>
+          <p id="statsSubtitle" class="text-xs text-slate-400">Overzicht van gegooide pijlen en precisie</p>
         </div>
         <button onclick="closeStatsModal()" class="text-slate-400 hover:text-white p-1">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
-      <!-- Winnaar banner -->
-      <div id="winnerBannerContainer" class="bg-gradient-to-r from-emerald-950/80 via-teal-900/60 to-emerald-950/80 border border-emerald-500/50 rounded-2xl p-2 my-1 text-center hidden shrink-0">
-        <div class="text-[10px] uppercase tracking-widest text-emerald-400 font-bold flex items-center justify-center gap-1.5">
-          <i class="fa-solid fa-trophy text-amber-400"></i> Leg Voltooid
-        </div>
-        <div id="statsWinnerHeadline" class="text-base font-extrabold text-white mt-0.5">Speler 1 Wint!</div>
-      </div>
+      <div id="statsContent" class="flex flex-col gap-3"></div>
 
-      <!-- Sets Totaal -->
-      <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 my-1 text-xs text-slate-300 shrink-0">
-        <span class="font-semibold text-slate-400">Totale Setstand (Gewonnen Legs):</span>
-        <span id="statsSetsScore" class="font-mono font-bold text-amber-400 text-sm">0 - 0</span>
-      </div>
-
-      <!-- Statistieken Vergelijking Scrollgebied -->
-      <div class="overflow-y-auto space-y-2 pr-1 my-1 flex-1 text-left min-h-0">
-        <!-- Speler Headers -->
-        <div class="grid grid-cols-2 gap-2 sticky top-0 bg-slate-900/95 backdrop-blur-sm py-1 z-10 border-b border-slate-800">
-          <div class="text-center bg-cyan-950/40 border border-cyan-500/30 rounded-xl p-1.5">
-            <div id="statColP1Name" class="text-xs font-bold text-cyan-400 truncate">Speler 1</div>
-            <div id="statColP1Score" class="font-darts text-2xl text-white leading-none mt-0.5">0 pt</div>
-          </div>
-          <div class="text-center bg-amber-950/40 border border-amber-500/30 rounded-xl p-1.5">
-            <div id="statColP2Name" class="text-xs font-bold text-amber-400 truncate">Speler 2</div>
-            <div id="statColP2Score" class="font-darts text-2xl text-white leading-none mt-0.5">0 pt</div>
-          </div>
-        </div>
-
-        <!-- 1. Raakpercentage -->
-        <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-2.5">
-          <div class="text-[11px] font-bold text-slate-300 uppercase tracking-wider text-center mb-1 flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-bullseye text-emerald-400"></i> Raak-percentage (In het getal)
-          </div>
-          <div class="grid grid-cols-2 gap-2 text-center">
-            <div id="boxP1HitRate" class="p-2 rounded-xl bg-slate-900 border border-slate-700">
-              <span id="valP1HitRate" class="font-mono text-xl sm:text-2xl font-black text-emerald-400">0.0%</span>
-              <div id="subP1HitRate" class="text-[10px] text-slate-400 mt-0.5">0 / 0 pijlen raak</div>
-            </div>
-            <div id="boxP2HitRate" class="p-2 rounded-xl bg-slate-900 border border-slate-700">
-              <span id="valP2HitRate" class="font-mono text-xl sm:text-2xl font-black text-emerald-400">0.0%</span>
-              <div id="subP2HitRate" class="text-[10px] text-slate-400 mt-0.5">0 / 0 pijlen raak</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. Triples & Doubles -->
-        <div class="grid grid-cols-2 gap-2">
-          <!-- Triples -->
-          <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-2">
-            <div class="text-[10px] uppercase font-bold text-amber-400 text-center mb-1">
-              <i class="fa-solid fa-bolt mr-1"></i>Triples (3 pt)
-            </div>
-            <div class="grid grid-cols-2 gap-1 text-center">
-              <div id="boxP1Triples" class="bg-slate-900/90 rounded-lg p-1">
-                <div id="valP1Triples" class="font-bold text-sm text-white">0</div>
-                <div id="pctP1Triples" class="text-[9px] text-slate-400">0%</div>
-              </div>
-              <div id="boxP2Triples" class="bg-slate-900/90 rounded-lg p-1">
-                <div id="valP2Triples" class="font-bold text-sm text-white">0</div>
-                <div id="pctP2Triples" class="text-[9px] text-slate-400">0%</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Doubles -->
-          <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-2">
-            <div class="text-[10px] uppercase font-bold text-blue-400 text-center mb-1">
-              <i class="fa-solid fa-layer-group mr-1"></i>Doubles (2 pt)
-            </div>
-            <div class="grid grid-cols-2 gap-1 text-center">
-              <div id="boxP1Doubles" class="bg-slate-900/90 rounded-lg p-1">
-                <div id="valP1Doubles" class="font-bold text-sm text-white">0</div>
-                <div id="pctP1Doubles" class="text-[9px] text-slate-400">0%</div>
-              </div>
-              <div id="boxP2Doubles" class="bg-slate-900/90 rounded-lg p-1">
-                <div id="valP2Doubles" class="font-bold text-sm text-white">0</div>
-                <div id="pctP2Doubles" class="text-[9px] text-slate-400">0%</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. Enkels & Missers -->
-        <div class="grid grid-cols-2 gap-2">
-          <!-- Enkels -->
-          <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-2">
-            <div class="text-[10px] uppercase font-bold text-emerald-400 text-center mb-1">
-              <i class="fa-solid fa-check mr-1"></i>Enkels (1 pt)
-            </div>
-            <div class="grid grid-cols-2 gap-1 text-center">
-              <div id="boxP1Singles" class="bg-slate-900/90 rounded-lg p-1">
-                <div id="valP1Singles" class="font-bold text-sm text-white">0</div>
-                <div id="pctP1Singles" class="text-[9px] text-slate-400">0%</div>
-              </div>
-              <div id="boxP2Singles" class="bg-slate-900/90 rounded-lg p-1">
-                <div id="valP2Singles" class="font-bold text-sm text-white">0</div>
-                <div id="pctP2Singles" class="text-[9px] text-slate-400">0%</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Missers -->
-          <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-2">
-            <div class="text-[10px] uppercase font-bold text-rose-400 text-center mb-1">
-              <i class="fa-solid fa-circle-xmark mr-1"></i>Missers (0 pt)
-            </div>
-            <div class="grid grid-cols-2 gap-1 text-center">
-              <div id="boxP1Misses" class="bg-slate-900/90 rounded-lg p-1">
-                <div id="valP1Misses" class="font-bold text-sm text-rose-400">0</div>
-                <div id="pctP1Misses" class="text-[9px] text-slate-400">0%</div>
-              </div>
-              <div id="boxP2Misses" class="bg-slate-900/90 rounded-lg p-1">
-                <div id="valP2Misses" class="font-bold text-sm text-rose-400">0</div>
-                <div id="pctP2Misses" class="text-[9px] text-slate-400">0%</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. Gemiddeldes -->
-        <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-2.5">
-          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider text-center mb-1.5">
-            Gemiddeldes & Hoogste Beurt
-          </div>
-          <div class="space-y-1 text-xs">
-            <div class="flex justify-between items-center bg-slate-900/80 px-2 py-1 rounded-lg">
-              <span id="statP1AvgTurn" class="font-mono text-cyan-300 font-semibold w-16 text-left">0.0</span>
-              <span class="text-[10px] text-slate-400">Gemiddelde per beurt (3 pijlen)</span>
-              <span id="statP2AvgTurn" class="font-mono text-amber-300 font-semibold w-16 text-right">0.0</span>
-            </div>
-            <div class="flex justify-between items-center bg-slate-900/80 px-2 py-1 rounded-lg">
-              <span id="statP1AvgDart" class="font-mono text-cyan-300 font-semibold w-16 text-left">0.0</span>
-              <span class="text-[10px] text-slate-400">Gemiddelde per pijl</span>
-              <span id="statP2AvgDart" class="font-mono text-amber-300 font-semibold w-16 text-right">0.0</span>
-            </div>
-            <div class="flex justify-between items-center bg-slate-900/80 px-2 py-1 rounded-lg">
-              <span id="statP1HighTurn" class="font-mono text-cyan-300 font-semibold w-16 text-left">0 pt</span>
-              <span class="text-[10px] text-slate-400">Hoogste beurtscore (max 9)</span>
-              <span id="statP2HighTurn" class="font-mono text-amber-300 font-semibold w-16 text-right">0 pt</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="pt-2 mt-1 border-t border-slate-800 flex flex-col sm:flex-row gap-2 shrink-0">
-        <button id="btnModalNextGame" onclick="startNewLeg()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-950/40 hover:from-emerald-400 hover:to-teal-500 transition">
-          <i class="fa-solid fa-play mr-1.5"></i>Volgend Potje Starten
-        </button>
-        <button onclick="closeStatsModal()" class="w-full sm:w-1/3 py-2 px-3 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 hover:text-white transition">
-          Sluiten
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- HERSTART BEVESTIGING MODAL -->
-  <div id="restartModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 text-center shadow-2xl">
-      <div class="w-12 h-12 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center mx-auto mb-2 text-xl">
-        <i class="fa-solid fa-rotate-right"></i>
-      </div>
-      <h3 class="text-base font-bold text-white mb-1">Nieuw potje starten?</h3>
-      <p class="text-xs text-slate-300 mb-4 leading-relaxed">
-        De worpen van het huidige potje worden gereset. De gewonnen sets blijven behouden.
-      </p>
-
-      <div class="grid grid-cols-2 gap-2">
-        <button onclick="closeRestartModal()" class="py-2 px-3 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 hover:text-white transition">
-          Annuleren
-        </button>
-        <button onclick="confirmRestartLeg()" class="py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 text-white text-xs font-bold hover:from-cyan-500 hover:to-teal-500 transition shadow-md shadow-cyan-950/40">
-          Ja, herstarten
-        </button>
+      <div class="pt-2 border-t border-slate-800 flex gap-2">
+        <button onclick="closeStatsModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">Sluiten</button>
+        <button id="endGameNewMatchBtn" onclick="closeStatsModal(); startNewGame(true);" class="hidden flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg">Nieuw Potje</button>
       </div>
     </div>
   </div>
 
-  <!-- INSTELLINGEN & SPELERS MODAL -->
-  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-5 shadow-2xl">
-      <div class="flex justify-between items-center mb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-users-gear text-amber-400"></i> Spelers Beheren & Wisselen
-        </h3>
-        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+  <!-- Modal: Bevestig Nieuw Potje -->
+  <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-4 text-center flex flex-col gap-3 shadow-2xl">
+      <div class="w-12 h-12 rounded-full bg-rose-950 text-rose-400 flex items-center justify-center mx-auto border border-rose-800 text-xl">
+        <i class="fa-solid fa-rotate-left"></i>
       </div>
-
-      <p class="text-xs text-slate-400 mb-3">Namen worden permanent opgeslagen in je browser. Kies uit opgeslagen spelers of voer nieuwe in.</p>
-
-      <div class="space-y-3">
-        <!-- Speler 1 Input -->
-        <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
-          <label class="block text-xs font-bold text-cyan-400 uppercase mb-1 flex items-center justify-between">
-            <span>Speler 1</span>
-            <span class="text-[10px] text-slate-400 font-normal">Begint als eerste</span>
-          </label>
-          <div class="flex gap-2">
-            <input type="text" id="inputP1Name" maxlength="16" placeholder="Naam Speler 1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 text-sm">
-          </div>
-          <div class="mt-2 flex flex-wrap gap-1 items-center">
-            <span class="text-[10px] text-slate-500 font-semibold mr-1">Kies:</span>
-            <div id="recentP1Container" class="flex flex-wrap gap-1"></div>
-          </div>
-        </div>
-
-        <!-- Wissel Speler 1 & 2 knop -->
-        <div class="flex justify-center -my-1">
-          <button onclick="swapCurrentPlayers()" class="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 hover:text-amber-400 text-xs font-semibold flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-arrow-down-up-across-line text-amber-400"></i>
-            Wissel Speler 1 & 2 om
-          </button>
-        </div>
-
-        <!-- Speler 2 Input -->
-        <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
-          <label class="block text-xs font-bold text-amber-400 uppercase mb-1 flex items-center justify-between">
-            <span>Speler 2</span>
-            <span class="text-[10px] text-slate-400 font-normal">Gooit als tweede</span>
-          </label>
-          <div class="flex gap-2">
-            <input type="text" id="inputP2Name" maxlength="16" placeholder="Naam Speler 2" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500 text-sm">
-          </div>
-          <div class="mt-2 flex flex-wrap gap-1 items-center">
-            <span class="text-[10px] text-slate-500 font-semibold mr-1">Kies:</span>
-            <div id="recentP2Container" class="flex flex-wrap gap-1"></div>
-          </div>
-        </div>
+      <div>
+        <h4 class="text-base font-bold text-white">Nieuw potje starten?</h4>
+        <p class="text-xs text-slate-400 mt-1">De huidige leg wordt gewist. Gewonnen sets blijven bewaard.</p>
       </div>
-
-      <div class="mt-4 flex gap-2">
-        <button onclick="savePlayerNames()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold hover:from-emerald-500 hover:to-teal-500 transition text-sm shadow-md shadow-emerald-950/40">
-          <i class="fa-solid fa-check mr-1.5"></i> Namen Opslaan & Toepassen
-        </button>
+      <div class="flex gap-2 mt-2">
+        <button onclick="closeConfirmModal()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300">Annuleren</button>
+        <button onclick="confirmResetExecute()" class="flex-1 py-2 bg-rose-600 hover:bg-rose-500 rounded-xl text-xs font-bold text-white shadow-lg shadow-rose-950">Start Nieuw</button>
       </div>
     </div>
-  </div>
-
-  <!-- Toast Notificatie -->
-  <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-800/95 border border-slate-700 text-white text-xs px-3.5 py-1.5 rounded-full shadow-2xl pointer-events-none transition-opacity duration-300 opacity-0 z-50 flex items-center gap-2">
-    <i class="fa-solid fa-circle-info text-cyan-400"></i>
-    <span id="toastMessage">Melding</span>
   </div>
 
   <script>
-    let audioCtx = null;
-    let audioEnabled = true;
+    // --- Spelstatus ---
+    let targets = []; // 21 items: random 1-20 + bull(25)
+    let currentTargetIndex = 0; // 0..20
+    let currentPlayer = 1; // 1 of 2
+    let currentDart = 1; // 1..3
 
-    function playTone(freq, duration = 0.08, type = 'sine') {
-      if (!audioEnabled) return;
+    let p1TurnThrows = [];
+    let p2TurnThrows = [];
+
+    // Vorige beurt totalen voor weergave
+    let p1LastTurnScore = null;
+    let p2LastTurnScore = null;
+
+    let p1MatchThrows = []; // alle scores
+    let p2MatchThrows = [];
+
+    let p1SetsWon = 0;
+    let p2SetsWon = 0;
+
+    let player1Name = "Speler 1";
+    let player2Name = "Speler 2";
+    let savedRoster = ["Speler 1", "Speler 2", "Marco", "Jeannette", "Dennis", "Patrick"];
+
+    let actionHistory = []; // Voor de Undo-knop
+    let wakeLock = null;
+
+    // --- Init & Opslag ---
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStorageData();
+      startNewGame(false);
+      renderRosterBadges();
+      setupScreenHeightFix();
+    });
+
+    function setupScreenHeightFix() {
+      const setHeight = () => {
+        document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+      };
+      window.addEventListener('resize', setHeight);
+      setHeight();
+    }
+
+    function loadStorageData() {
       try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
+        const storedP1 = localStorage.getItem('darts_p1_name');
+        const storedP2 = localStorage.getItem('darts_p2_name');
+        const storedSets1 = localStorage.getItem('darts_p1_sets');
+        const storedSets2 = localStorage.getItem('darts_p2_sets');
+        const storedRoster = localStorage.getItem('darts_player_roster');
+
+        if (storedP1) player1Name = storedP1;
+        if (storedP2) player2Name = storedP2;
+        if (storedSets1 !== null) p1SetsWon = parseInt(storedSets1, 10) || 0;
+        if (storedSets2 !== null) p2SetsWon = parseInt(storedSets2, 10) || 0;
+        if (storedRoster) savedRoster = JSON.parse(storedRoster);
       } catch (e) {
-        console.warn('Audio fout:', e);
+        console.warn('Storage niet toegankelijk', e);
       }
+      updatePlayerNamesUI();
     }
 
-    function toggleAudio() {
-      audioEnabled = !audioEnabled;
-      const icon = document.getElementById('soundIcon');
-      if (audioEnabled) {
-        icon.className = 'fa-solid fa-volume-high text-xs sm:text-sm text-white';
-        showToast('Geluid & Trillen ingeschakeld');
-        playTone(520, 0.08, 'sine');
-      } else {
-        icon.className = 'fa-solid fa-volume-xmark text-xs sm:text-sm text-slate-500';
-        showToast('Geluid uitgeschakeld');
-      }
+    function persistState() {
+      try {
+        localStorage.setItem('darts_p1_name', player1Name);
+        localStorage.setItem('darts_p2_name', player2Name);
+        localStorage.setItem('darts_p1_sets', p1SetsWon);
+        localStorage.setItem('darts_p2_sets', p2SetsWon);
+        localStorage.setItem('darts_player_roster', JSON.stringify(savedRoster));
+      } catch (e) {}
     }
 
-    function triggerHaptic(pattern = 15) {
-      if (audioEnabled && 'vibrate' in navigator) {
-        try {
-          navigator.vibrate(pattern);
-        } catch (e) {}
-      }
-    }
-
-    // Wake Lock Screen Keeping
-    let wakeLockSentinel = null;
-    async function toggleWakeLock() {
-      if ('wakeLock' in navigator) {
-        try {
-          if (!wakeLockSentinel) {
-            wakeLockSentinel = await navigator.wakeLock.request('screen');
-            document.getElementById('wakelockIcon').className = 'fa-solid fa-lightbulb text-amber-400 text-xs';
-            document.getElementById('wakelockBtn').classList.add('border-amber-500/50');
-            showToast('Scherm blijft continu aan');
-            wakeLockSentinel.addEventListener('release', () => {
-              wakeLockSentinel = null;
-              document.getElementById('wakelockIcon').className = 'fa-solid fa-lightbulb text-slate-400 text-xs';
-              document.getElementById('wakelockBtn').classList.remove('border-amber-500/50');
-            });
-          } else {
-            await wakeLockSentinel.release();
-            wakeLockSentinel = null;
-            document.getElementById('wakelockIcon').className = 'fa-solid fa-lightbulb text-slate-400 text-xs';
-            document.getElementById('wakelockBtn').classList.remove('border-amber-500/50');
-            showToast('Normale schermbeveiliging actief');
-          }
-        } catch (err) {
-          showToast('Wake Lock niet beschikbaar');
-        }
-      } else {
-        showToast('Wake Lock API niet ondersteund');
-      }
-    }
-
-    // GAME STATE & STORAGE KEYS
-    const STORAGE_KEY_STATS = 'darts_rtb_stats_3p_v4';
-    const STORAGE_KEY_ACTIVE_PLAYERS = 'darts_rtb_active_players_v4';
-    const STORAGE_KEY_PLAYER_ROSTER = 'darts_rtb_roster_v4';
-
-    let gameState = {
-      player1Name: "Speler 1",
-      player2Name: "Speler 2",
-      p1Score: 0,
-      p2Score: 0,
-      p1MatchWins: 0,
-      p2MatchWins: 0,
-      activePlayer: 1,
-      currentTargetIndex: 0,
-      currentDartInTurn: 0,
-      currentTurnScores: [],
-      targetSequence: [],
-      p1Darts: [],
-      p2Darts: [],
-      p1TurnTotals: [],
-      p2TurnTotals: [],
-      history: [],
-      isFinished: false,
-      savedRoster: ["Speler 1", "Speler 2", "Michael", "Luke", "Raymond"]
-    };
-
+    // --- Nieuw Potje & Generatie ---
     function generateTargetSequence() {
-      const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
-      for (let i = numbers.length - 1; i > 0; i--) {
+      let nums = [];
+      for (let i = 1; i <= 20; i++) nums.push(i);
+      // Fisher-Yates shuffle
+      for (let i = nums.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+        [nums[i], nums[j]] = [nums[j], nums[i]];
       }
-      numbers.push("BULL");
-      return numbers;
+      nums.push(25); // Altijd Bullseye als laatste (21e doel)
+      return nums;
     }
 
-    function loadSavedState() {
-      try {
-        const savedActive = localStorage.getItem(STORAGE_KEY_ACTIVE_PLAYERS);
-        if (savedActive) {
-          const parsed = JSON.parse(savedActive);
-          if (parsed.p1 && parsed.p1.trim()) gameState.player1Name = parsed.p1.trim();
-          if (parsed.p2 && parsed.p2.trim()) gameState.player2Name = parsed.p2.trim();
-        }
+    function startNewGame(isManualReset = false) {
+      targets = generateTargetSequence();
+      currentTargetIndex = 0;
+      currentPlayer = 1;
+      currentDart = 1;
 
-        const savedRoster = localStorage.getItem(STORAGE_KEY_PLAYER_ROSTER);
-        if (savedRoster) {
-          const rosterParsed = JSON.parse(savedRoster);
-          if (Array.isArray(rosterParsed) && rosterParsed.length > 0) {
-            gameState.savedRoster = rosterParsed;
-          }
-        }
-        addToRoster(gameState.player1Name);
-        addToRoster(gameState.player2Name);
+      p1TurnThrows = [];
+      p2TurnThrows = [];
+      p1LastTurnScore = null;
+      p2LastTurnScore = null;
 
-        const savedStats = localStorage.getItem(STORAGE_KEY_STATS);
-        if (savedStats) {
-          const parsed = JSON.parse(savedStats);
-          gameState.p1MatchWins = parsed.p1Wins || 0;
-          gameState.p2MatchWins = parsed.p2Wins || 0;
-        }
-      } catch (e) {
-        console.error("Fout bij laden van localStorage:", e);
-      }
+      p1MatchThrows = [];
+      p2MatchThrows = [];
+      actionHistory = [];
+
+      renderTargetsList();
+      updateTargetDisplay();
+      updateUI();
     }
 
-    function saveStats() {
-      try {
-        localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify({
-          p1Wins: gameState.p1MatchWins,
-          p2Wins: gameState.p2MatchWins
-        }));
-      } catch (e) {}
+    // --- UI Update Functies ---
+    function updatePlayerNamesUI() {
+      document.getElementById('p1NameDisplay').textContent = player1Name;
+      document.getElementById('p2NameDisplay').textContent = player2Name;
+      document.getElementById('p1SetsBadge').textContent = `Sets: ${p1SetsWon}`;
+      document.getElementById('p2SetsBadge').textContent = `Sets: ${p2SetsWon}`;
     }
 
-    function savePlayers() {
-      try {
-        localStorage.setItem(STORAGE_KEY_ACTIVE_PLAYERS, JSON.stringify({
-          p1: gameState.player1Name,
-          p2: gameState.player2Name
-        }));
-        localStorage.setItem(STORAGE_KEY_PLAYER_ROSTER, JSON.stringify(gameState.savedRoster));
-      } catch (e) {}
+    function renderTargetsList() {
+      const container = document.getElementById('targetsScroller');
+      container.innerHTML = '';
+
+      targets.forEach((num, idx) => {
+        const isBull = num === 25;
+        const label = isBull ? 'BULL' : num;
+        const badge = document.createElement('div');
+        badge.id = `target-badge-${idx}`;
+        badge.className = `shrink-0 px-2.5 py-1 rounded-lg text-xs font-mono font-black border transition-all ${
+          idx === currentTargetIndex
+            ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-md shadow-amber-500/40 scale-105 ring-2 ring-amber-400/50'
+            : idx < currentTargetIndex
+            ? 'bg-slate-900/40 text-slate-600 border-slate-800 line-through'
+            : 'bg-amber-950/40 text-amber-300 border-amber-700/60 shadow-sm'
+        }`;
+        badge.textContent = label;
+        container.appendChild(badge);
+      });
+      scrollTargetIntoView();
     }
 
-    function addToRoster(name) {
-      if (!name || typeof name !== 'string') return;
-      const clean = name.trim();
-      if (!clean) return;
-      if (!gameState.savedRoster.includes(clean)) {
-        gameState.savedRoster.unshift(clean);
-        if (gameState.savedRoster.length > 10) {
-          gameState.savedRoster = gameState.savedRoster.slice(0, 10);
-        }
+    function scrollTargetIntoView() {
+      const currentBadge = document.getElementById(`target-badge-${currentTargetIndex}`);
+      if (currentBadge) {
+        currentBadge.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       }
     }
 
-    function registerDart(points) {
-      if (gameState.isFinished) {
-        showToast('Potje is afgelopen! Start een nieuw potje.');
-        return;
+    function updateTargetDisplay() {
+      const target = targets[currentTargetIndex];
+      const isBull = target === 25;
+
+      document.getElementById('targetCounter').textContent = `${currentTargetIndex + 1} / 21`;
+      document.getElementById('currentTargetNum').textContent = isBull ? 'BULL' : target;
+      document.getElementById('targetSubLabel').textContent = isBull ? 'FINALE' : 'NUMMER';
+      document.getElementById('currentDartNum').textContent = currentDart;
+
+      const btnTriple = document.getElementById('btnTriple');
+      const lblSingle = document.getElementById('lblSingle');
+      const subSingle = document.getElementById('subSingle');
+      const lblDouble = document.getElementById('lblDouble');
+      const subDouble = document.getElementById('subDouble');
+
+      if (isBull) {
+        btnTriple.disabled = true;
+        lblSingle.textContent = 'ENKELE BULL';
+        subSingle.textContent = '1 punt (25)';
+        lblDouble.textContent = 'DUBBELE BULL';
+        subDouble.textContent = '2 punten (50)';
+      } else {
+        btnTriple.disabled = false;
+        lblSingle.textContent = 'ENKEL';
+        subSingle.textContent = '1 punt';
+        lblDouble.textContent = 'DUBBEL';
+        subDouble.textContent = '2 punten';
       }
 
-      gameState.history.push({
-        activePlayer: gameState.activePlayer,
-        currentTargetIndex: gameState.currentTargetIndex,
-        currentDartInTurn: gameState.currentDartInTurn,
-        turnScores: [...gameState.currentTurnScores],
-        p1Score: gameState.p1Score,
-        p2Score: gameState.p2Score,
-        p1DartsLength: gameState.p1Darts.length,
-        p2DartsLength: gameState.p2Darts.length,
-        p1TurnTotalsLength: gameState.p1TurnTotals.length,
-        p2TurnTotalsLength: gameState.p2TurnTotals.length,
-        points: points
+      renderTargetsList();
+    }
+
+    function updateUI() {
+      const p1Total = p1MatchThrows.reduce((a, b) => a + b, 0);
+      const p2Total = p2MatchThrows.reduce((a, b) => a + b, 0);
+
+      document.getElementById('p1Score').textContent = p1Total;
+      document.getElementById('p2Score').textContent = p2Total;
+
+      // Update Vorige Beurt Weergave
+      const p1LastEl = document.getElementById('p1LastTurn');
+      const p2LastEl = document.getElementById('p2LastTurn');
+
+      if (p1LastTurnScore !== null) {
+        p1LastEl.textContent = `Vorige: +${p1LastTurnScore} pt`;
+      } else {
+        p1LastEl.textContent = `Vorige: -`;
+      }
+
+      if (p2LastTurnScore !== null) {
+        p2LastEl.textContent = `Vorige: +${p2LastTurnScore} pt`;
+      } else {
+        p2LastEl.textContent = `Vorige: -`;
+      }
+
+      // Actieve speler indicators & randen
+      const p1Card = document.getElementById('p1Card');
+      const p2Card = document.getElementById('p2Card');
+      const p1Ind = document.getElementById('p1TurnIndicator');
+      const p2Ind = document.getElementById('p2TurnIndicator');
+
+      if (currentPlayer === 1) {
+        p1Card.classList.add('border-emerald-500', 'bg-slate-900');
+        p1Card.classList.remove('border-transparent', 'opacity-70');
+        p2Card.classList.remove('border-cyan-500');
+        p2Card.classList.add('border-transparent', 'opacity-70');
+        p1Ind.classList.remove('hidden');
+        p2Ind.classList.add('hidden');
+        document.getElementById('currentTurnPlayer').textContent = player1Name;
+        document.getElementById('currentTurnPlayer').className = 'text-emerald-400 font-bold';
+      } else {
+        p2Card.classList.add('border-cyan-500', 'bg-slate-900');
+        p2Card.classList.remove('border-transparent', 'opacity-70');
+        p1Card.classList.remove('border-emerald-500');
+        p1Card.classList.add('border-transparent', 'opacity-70');
+        p2Ind.classList.remove('hidden');
+        p1Ind.classList.add('hidden');
+        document.getElementById('currentTurnPlayer').textContent = player2Name;
+        document.getElementById('currentTurnPlayer').className = 'text-cyan-400 font-bold';
+      }
+
+      // Update 3-darts slots
+      const activeThrows = currentPlayer === 1 ? p1TurnThrows : p2TurnThrows;
+      for (let i = 0; i < 3; i++) {
+        const slot = document.getElementById(`dartSlot${i}`);
+        if (i < activeThrows.length) {
+          const val = activeThrows[i];
+          const text = val === 0 ? 'M' : val === 1 ? '1x' : val === 2 ? '2x' : '3x';
+          const color = val === 0 ? 'text-rose-400 border-rose-800 bg-rose-950/40' : 'text-emerald-400 border-emerald-700 bg-emerald-950/40';
+          slot.className = `w-8 h-8 rounded-lg border-2 flex items-center justify-center font-bold text-xs font-mono ${color}`;
+          slot.textContent = text;
+        } else if (i === activeThrows.length) {
+          slot.className = 'w-8 h-8 rounded-lg border-2 border-emerald-500 bg-slate-900 flex items-center justify-center font-bold text-xs text-white font-mono animate-pulse';
+          slot.textContent = i + 1;
+        } else {
+          slot.className = 'w-8 h-8 rounded-lg border-2 border-slate-800 bg-slate-950 flex items-center justify-center font-bold text-xs text-slate-600 font-mono';
+          slot.textContent = i + 1;
+        }
+      }
+
+      const turnSum = activeThrows.reduce((a, b) => a + b, 0);
+      document.getElementById('turnPointsBadge').textContent = `+${turnSum} pt`;
+      document.getElementById('undoBtn').disabled = actionHistory.length === 0;
+    }
+
+    // --- Scoring & Spelverloop ---
+    function registerThrow(points) {
+      if (currentTargetIndex >= targets.length) return;
+
+      // Sla op in geschiedenis voor Undo
+      actionHistory.push({
+        player: currentPlayer,
+        targetIndex: currentTargetIndex,
+        dartNum: currentDart,
+        points: points,
+        p1LastScoreBefore: p1LastTurnScore,
+        p2LastScoreBefore: p2LastTurnScore
       });
 
-      if (points === 0) {
-        playTone(180, 0.08, 'sawtooth');
-        triggerHaptic(20);
-      } else if (points === 1) {
-        playTone(480, 0.08, 'sine');
-        triggerHaptic(30);
-      } else if (points === 2) {
-        playTone(620, 0.12, 'triangle');
-        triggerHaptic([30, 25, 30]);
-      } else if (points === 3) {
-        playTone(784, 0.14, 'triangle');
-        triggerHaptic([40, 20, 70]);
-      }
-
-      if (gameState.activePlayer === 1) {
-        gameState.p1Score += points;
-        gameState.p1Darts.push(points);
+      if (currentPlayer === 1) {
+        p1TurnThrows.push(points);
+        p1MatchThrows.push(points);
       } else {
-        gameState.p2Score += points;
-        gameState.p2Darts.push(points);
+        p2TurnThrows.push(points);
+        p2MatchThrows.push(points);
       }
 
-      gameState.currentTurnScores.push(points);
-      gameState.currentDartInTurn += 1;
+      if (navigator.vibrate) {
+        navigator.vibrate(points > 0 ? 30 : [20, 40, 20]);
+      }
 
-      if (gameState.currentDartInTurn >= 3) {
-        const turnTotal = gameState.currentTurnScores.reduce((a, b) => a + b, 0);
-
-        if (gameState.activePlayer === 1) {
-          gameState.p1TurnTotals.push(turnTotal);
-          gameState.activePlayer = 2;
-          gameState.currentDartInTurn = 0;
-          gameState.currentTurnScores = [];
-          showToast(`${gameState.player1Name}: +${turnTotal} pt. Beurt aan ${gameState.player2Name}`);
+      // Volgende pijl of beurt wissel
+      if (currentDart < 3) {
+        currentDart++;
+      } else {
+        // Einde van 3-darts beurt
+        if (currentPlayer === 1) {
+          p1LastTurnScore = p1TurnThrows.reduce((a, b) => a + b, 0);
+          currentPlayer = 2;
+          currentDart = 1;
+          p2TurnThrows = [];
         } else {
-          gameState.p2TurnTotals.push(turnTotal);
-          gameState.currentDartInTurn = 0;
-          gameState.currentTurnScores = [];
-
-          if (gameState.currentTargetIndex < 20) {
-            gameState.currentTargetIndex += 1;
-            gameState.activePlayer = 1;
-            showToast(`${gameState.player2Name}: +${turnTotal} pt. Volgend getal!`);
+          p2LastTurnScore = p2TurnThrows.reduce((a, b) => a + b, 0);
+          // Beide spelers hebben naar het nummer gegooid
+          if (currentTargetIndex < targets.length - 1) {
+            currentTargetIndex++;
+            currentPlayer = 1;
+            currentDart = 1;
+            p1TurnThrows = [];
+            p2TurnThrows = [];
           } else {
-            finishGame();
+            // Einde wedstrijd!
+            handleGameEnd();
             return;
           }
         }
       }
 
-      renderUI();
+      updateTargetDisplay();
+      updateUI();
     }
 
-    function undoLastDart() {
-      if (gameState.history.length === 0) {
-        showToast('Geen worpen om te wissen');
-        return;
+    function undoLastThrow() {
+      if (actionHistory.length === 0) return;
+      const last = actionHistory.pop();
+
+      currentTargetIndex = last.targetIndex;
+      currentPlayer = last.player;
+      currentDart = last.dartNum;
+      p1LastTurnScore = last.p1LastScoreBefore;
+      p2LastTurnScore = last.p2LastScoreBefore;
+
+      if (currentPlayer === 1) {
+        p1MatchThrows.pop();
+        p1TurnThrows.pop();
+      } else {
+        p2MatchThrows.pop();
+        p2TurnThrows.pop();
       }
 
-      const prev = gameState.history.pop();
-      gameState.activePlayer = prev.activePlayer;
-      gameState.currentTargetIndex = prev.currentTargetIndex;
-      gameState.currentDartInTurn = prev.currentDartInTurn;
-      gameState.currentTurnScores = prev.turnScores;
-      gameState.p1Score = prev.p1Score;
-      gameState.p2Score = prev.p2Score;
-
-      gameState.p1Darts.length = prev.p1DartsLength;
-      gameState.p2Darts.length = prev.p2DartsLength;
-      gameState.p1TurnTotals.length = prev.p1TurnTotalsLength;
-      gameState.p2TurnTotals.length = prev.p2TurnTotalsLength;
-      gameState.isFinished = false;
-
-      playTone(300, 0.08, 'square');
-      triggerHaptic(15);
-      showToast('Laatste pijl gewist');
-      renderUI();
+      updateTargetDisplay();
+      updateUI();
     }
 
-    function calculatePlayerStats(dartsArray, turnTotalsArray, currentScore) {
-      const totalDarts = dartsArray.length;
-      let singles = 0, doubles = 0, triples = 0, misses = 0;
+    function handleGameEnd() {
+      const p1Total = p1MatchThrows.reduce((a, b) => a + b, 0);
+      const p2Total = p2MatchThrows.reduce((a, b) => a + b, 0);
 
-      dartsArray.forEach(d => {
-        if (d === 0) misses++;
-        else if (d === 1) singles++;
-        else if (d === 2) doubles++;
-        else if (d === 3) triples++;
+      if (p1Total > p2Total) {
+        p1SetsWon++;
+      } else if (p2Total > p1Total) {
+        p2SetsWon++;
+      }
+      persistState();
+      updatePlayerNamesUI();
+
+      // Feestelijke confetti
+      confetti({
+        particleCount: 90,
+        spread: 70,
+        origin: { y: 0.6 }
       });
 
-      const hits = singles + doubles + triples;
-      const hitPercentage = totalDarts > 0 ? ((hits / totalDarts) * 100) : 0;
-      const missPercentage = totalDarts > 0 ? ((misses / totalDarts) * 100) : 0;
-      const singlesPercentage = totalDarts > 0 ? ((singles / totalDarts) * 100) : 0;
-      const doublesPercentage = totalDarts > 0 ? ((doubles / totalDarts) * 100) : 0;
-      const triplesPercentage = totalDarts > 0 ? ((triples / totalDarts) * 100) : 0;
-
-      const turnsCount = turnTotalsArray.length;
-      const avgPerTurn = turnsCount > 0 
-        ? (turnTotalsArray.reduce((a, b) => a + b, 0) / turnsCount) 
-        : 0;
-
-      const avgPerDart = totalDarts > 0 ? (currentScore / totalDarts) : 0;
-      const highestTurn = turnTotalsArray.length > 0 ? Math.max(...turnTotalsArray) : 0;
-
-      return {
-        totalDarts, hits, hitPercentage, misses, missPercentage,
-        singles, singlesPercentage, doubles, doublesPercentage,
-        triples, triplesPercentage, avgPerTurn, avgPerDart, highestTurn,
-        totalScore: currentScore
-      };
+      // Toon direct statistieken
+      openStatsModal(true);
     }
 
-    function finishGame() {
-      gameState.isFinished = true;
-      let winnerText = "";
-
-      if (gameState.p1Score > gameState.p2Score) {
-        gameState.p1MatchWins += 1;
-        winnerText = `🏆 ${gameState.player1Name} heeft gewonnen!`;
-      } else if (gameState.p2Score > gameState.p1Score) {
-        gameState.p2MatchWins += 1;
-        winnerText = `🏆 ${gameState.player2Name} heeft gewonnen!`;
-      } else {
-        winnerText = "Gelijkspel! Beide spelers evenveel punten!";
-      }
-
-      saveStats();
-      renderUI();
-
-      if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 150,
-          spread: 80,
-          origin: { y: 0.6 }
-        });
-      }
-
-      openStatsModal(true, winnerText);
-    }
-
-    function openStatsModal(isGameOver = false, winnerText = "") {
-      const p1Stats = calculatePlayerStats(gameState.p1Darts, gameState.p1TurnTotals, gameState.p1Score);
-      const p2Stats = calculatePlayerStats(gameState.p2Darts, gameState.p2TurnTotals, gameState.p2Score);
-
-      const modalTitle = document.getElementById('statsModalTitle');
-      const modalSub = document.getElementById('statsModalSubtitle');
-      const winnerContainer = document.getElementById('winnerBannerContainer');
-      const winnerHeadline = document.getElementById('statsWinnerHeadline');
+    // --- Statistieken Modal ---
+    function openStatsModal(isGameOver = false) {
+      const content = document.getElementById('statsContent');
+      const title = document.getElementById('statsTitle');
+      const subtitle = document.getElementById('statsSubtitle');
+      const endBtn = document.getElementById('endGameNewMatchBtn');
 
       if (isGameOver) {
-        modalTitle.textContent = "Potje Voltooid! Eindstatistieken";
-        modalSub.textContent = "Volledige analyse van alle gegooide pijlen";
-        winnerHeadline.textContent = winnerText;
-        winnerContainer.classList.remove('hidden');
+        title.innerHTML = '<i class="fa-solid fa-trophy text-amber-400"></i> Einduitslag & Statistieken';
+        const p1Total = p1MatchThrows.reduce((a, b) => a + b, 0);
+        const p2Total = p2MatchThrows.reduce((a, b) => a + b, 0);
+        const winner = p1Total > p2Total ? `${player1Name} wint!` : p2Total > p1Total ? `${player2Name} wint!` : 'Gelijkspel!';
+        subtitle.textContent = `${winner} Stand: ${p1Total} - ${p2Total}`;
+        endBtn.classList.remove('hidden');
       } else {
-        modalTitle.textContent = "Live Statistieken";
-        modalSub.textContent = `Tussenstand na doel ${gameState.currentTargetIndex + 1} / 21`;
-        winnerContainer.classList.add('hidden');
+        title.innerHTML = '<i class="fa-solid fa-chart-simple text-cyan-400"></i> Huidige Wedstrijdstatistieken';
+        subtitle.textContent = `Tussenstand na ronde ${currentTargetIndex + 1} van 21`;
+        endBtn.classList.add('hidden');
       }
 
-      document.getElementById('statColP1Name').textContent = gameState.player1Name;
-      document.getElementById('statColP2Name').textContent = gameState.player2Name;
-      document.getElementById('statColP1Score').textContent = `${p1Stats.totalScore} pt`;
-      document.getElementById('statColP2Score').textContent = `${p2Stats.totalScore} pt`;
-      document.getElementById('statsSetsScore').textContent = `${gameState.p1MatchWins} - ${gameState.p2MatchWins}`;
+      const p1Stats = calculateStats(p1MatchThrows);
+      const p2Stats = calculateStats(p2MatchThrows);
 
-      document.getElementById('valP1HitRate').textContent = `${p1Stats.hitPercentage.toFixed(1)}%`;
-      document.getElementById('valP2HitRate').textContent = `${p2Stats.hitPercentage.toFixed(1)}%`;
-      document.getElementById('subP1HitRate').textContent = `${p1Stats.hits} van ${p1Stats.totalDarts} raak`;
-      document.getElementById('subP2HitRate').textContent = `${p2Stats.hits} van ${p2Stats.totalDarts} raak`;
+      content.innerHTML = `
+        <div class="grid grid-cols-2 gap-2 text-center">
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+            <span class="text-xs font-bold text-emerald-400 truncate block">${player1Name}</span>
+            <span class="text-2xl font-black text-white font-mono">${p1Stats.totalPoints} <span class="text-xs text-slate-400 font-normal">pt</span></span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+            <span class="text-xs font-bold text-cyan-400 truncate block">${player2Name}</span>
+            <span class="text-2xl font-black text-white font-mono">${p2Stats.totalPoints} <span class="text-xs text-slate-400 font-normal">pt</span></span>
+          </div>
+        </div>
 
-      document.getElementById('valP1Triples').textContent = p1Stats.triples;
-      document.getElementById('valP2Triples').textContent = p2Stats.triples;
-      document.getElementById('pctP1Triples').textContent = `${p1Stats.triplesPercentage.toFixed(1)}%`;
-      document.getElementById('pctP2Triples').textContent = `${p2Stats.triplesPercentage.toFixed(1)}%`;
+        <!-- Tabel Vergelijking -->
+        <div class="bg-slate-950/80 rounded-xl border border-slate-800 overflow-hidden text-xs">
+          <div class="grid grid-cols-3 bg-slate-800/80 p-2 font-bold text-slate-300 border-b border-slate-800">
+            <span class="text-left">${player1Name}</span>
+            <span class="text-center text-slate-400">Statistiek</span>
+            <span class="text-right">${player2Name}</span>
+          </div>
 
-      document.getElementById('valP1Doubles').textContent = p1Stats.doubles;
-      document.getElementById('valP2Doubles').textContent = p2Stats.doubles;
-      document.getElementById('pctP1Doubles').textContent = `${p1Stats.doublesPercentage.toFixed(1)}%`;
-      document.getElementById('pctP2Doubles').textContent = `${p2Stats.doublesPercentage.toFixed(1)}%`;
-
-      document.getElementById('valP1Singles').textContent = p1Stats.singles;
-      document.getElementById('valP2Singles').textContent = p2Stats.singles;
-      document.getElementById('pctP1Singles').textContent = `${p1Stats.singlesPercentage.toFixed(1)}%`;
-      document.getElementById('pctP2Singles').textContent = `${p2Stats.singlesPercentage.toFixed(1)}%`;
-
-      document.getElementById('valP1Misses').textContent = p1Stats.misses;
-      document.getElementById('valP2Misses').textContent = p2Stats.misses;
-      document.getElementById('pctP1Misses').textContent = `${p1Stats.missPercentage.toFixed(1)}%`;
-      document.getElementById('pctP2Misses').textContent = `${p2Stats.missPercentage.toFixed(1)}%`;
-
-      document.getElementById('statP1AvgTurn').textContent = p1Stats.avgPerTurn.toFixed(1);
-      document.getElementById('statP2AvgTurn').textContent = p2Stats.avgPerTurn.toFixed(1);
-      document.getElementById('statP1AvgDart').textContent = p1Stats.avgPerDart.toFixed(2);
-      document.getElementById('statP2AvgDart').textContent = p2Stats.avgPerDart.toFixed(2);
-      document.getElementById('statP1HighTurn').textContent = `${p1Stats.highestTurn} pt`;
-      document.getElementById('statP2HighTurn').textContent = `${p2Stats.highestTurn} pt`;
-
-      applyStatHighlight('boxP1HitRate', 'boxP2HitRate', p1Stats.hitPercentage, p2Stats.hitPercentage, false);
-      applyStatHighlight('boxP1Triples', 'boxP2Triples', p1Stats.triples, p2Stats.triples, false);
-      applyStatHighlight('boxP1Doubles', 'boxP2Doubles', p1Stats.doubles, p2Stats.doubles, false);
-      applyStatHighlight('boxP1Misses', 'boxP2Misses', p1Stats.misses, p2Stats.misses, true);
+          <div class="divide-y divide-slate-850">
+            ${renderStatRow('Rake Pijlen %', `${p1Stats.hitPercent}%`, `${p2Stats.hitPercent}%`, p1Stats.hitPercent, p2Stats.hitPercent)}
+            ${renderStatRow('Raken / Totaal', `${p1Stats.hits}/${p1Stats.totalDarts}`, `${p2Stats.hits}/${p2Stats.totalDarts}`)}
+            ${renderStatRow('Triples (3pt)', `${p1Stats.triples} (${p1Stats.triplesPct}%)`, `${p2Stats.triples} (${p2Stats.triplesPct}%)`, p1Stats.triples, p2Stats.triples)}
+            ${renderStatRow('Doubles (2pt)', `${p1Stats.doubles} (${p1Stats.doublesPct}%)`, `${p2Stats.doubles} (${p2Stats.doublesPct}%)`, p1Stats.doubles, p2Stats.doubles)}
+            ${renderStatRow('Singles (1pt)', `${p1Stats.singles} (${p1Stats.singlesPct}%)`, `${p2Stats.singles} (${p2Stats.singlesPct}%)`, p1Stats.singles, p2Stats.singles)}
+            ${renderStatRow('Missers (0pt)', `${p1Stats.misses} (${p1Stats.missesPct}%)`, `${p2Stats.misses} (${p2Stats.missesPct}%)`, -p1Stats.misses, -p2Stats.misses)}
+            ${renderStatRow('Gem. per Beurt', p1Stats.avgTurn, p2Stats.avgTurn, parseFloat(p1Stats.avgTurn), parseFloat(p2Stats.avgTurn))}
+          </div>
+        </div>
+      `;
 
       document.getElementById('statsModal').classList.remove('hidden');
     }
 
-    function applyStatHighlight(elem1Id, elem2Id, val1, val2, lowerIsBetter = false) {
-      const el1 = document.getElementById(elem1Id);
-      const el2 = document.getElementById(elem2Id);
-      el1.classList.remove('border-emerald-500/80', 'bg-emerald-950/30');
-      el2.classList.remove('border-emerald-500/80', 'bg-emerald-950/30');
-
-      if (val1 === val2) return;
-
-      const p1Wins = lowerIsBetter ? (val1 < val2) : (val1 > val2);
-      if (p1Wins) {
-        el1.classList.add('border-emerald-500/80', 'bg-emerald-950/30');
-      } else {
-        el2.classList.add('border-emerald-500/80', 'bg-emerald-950/30');
+    function renderStatRow(label, v1, v2, c1 = null, c2 = null) {
+      let c1Class = 'text-slate-200';
+      let c2Class = 'text-slate-200';
+      if (c1 !== null && c2 !== null) {
+        if (c1 > c2) c1Class = 'text-emerald-400 font-bold';
+        else if (c2 > c1) c2Class = 'text-cyan-400 font-bold';
       }
+      return `
+        <div class="grid grid-cols-3 p-2.5 items-center">
+          <span class="text-left font-mono ${c1Class}">${v1}</span>
+          <span class="text-center text-[11px] text-slate-400">${label}</span>
+          <span class="text-right font-mono ${c2Class}">${v2}</span>
+        </div>
+      `;
+    }
+
+    function calculateStats(throws) {
+      const totalDarts = throws.length;
+      if (totalDarts === 0) {
+        return { totalDarts: 0, totalPoints: 0, hits: 0, hitPercent: 0, triples: 0, triplesPct: 0, doubles: 0, doublesPct: 0, singles: 0, singlesPct: 0, misses: 0, missesPct: 0, avgTurn: "0.0" };
+      }
+      let singles = 0, doubles = 0, triples = 0, misses = 0, points = 0;
+      throws.forEach(t => {
+        points += t;
+        if (t === 3) triples++;
+        else if (t === 2) doubles++;
+        else if (t === 1) singles++;
+        else misses++;
+      });
+      const hits = singles + doubles + triples;
+      const hitPercent = ((hits / totalDarts) * 100).toFixed(1);
+      const triplesPct = ((triples / totalDarts) * 100).toFixed(0);
+      const doublesPct = ((doubles / totalDarts) * 100).toFixed(0);
+      const singlesPct = ((singles / totalDarts) * 100).toFixed(0);
+      const missesPct = ((misses / totalDarts) * 100).toFixed(0);
+      const turns = Math.ceil(totalDarts / 3) || 1;
+      const avgTurn = (points / turns).toFixed(1);
+
+      return { totalDarts, totalPoints: points, hits, hitPercent, triples, triplesPct, doubles, doublesPct, singles, singlesPct, misses, missesPct, avgTurn };
     }
 
     function closeStatsModal() {
       document.getElementById('statsModal').classList.add('hidden');
     }
 
-    function startNewLeg() {
-      gameState.targetSequence = generateTargetSequence();
-      gameState.currentTargetIndex = 0;
-      gameState.activePlayer = 1;
-      gameState.currentDartInTurn = 0;
-      gameState.currentTurnScores = [];
-      gameState.p1Score = 0;
-      gameState.p2Score = 0;
-      gameState.p1Darts = [];
-      gameState.p2Darts = [];
-      gameState.p1TurnTotals = [];
-      gameState.p2TurnTotals = [];
-      gameState.history = [];
-      gameState.isFinished = false;
-
-      closeStatsModal();
-      closeRestartModal();
-      renderUI();
-      showToast('Nieuw potje gestart!');
+    // --- Bevestig Nieuw Potje Modal ---
+    function confirmNewGame() {
+      if (actionHistory.length === 0) {
+        startNewGame(true);
+      } else {
+        document.getElementById('confirmModal').classList.remove('hidden');
+      }
+    }
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+    }
+    function confirmResetExecute() {
+      closeConfirmModal();
+      startNewGame(true);
     }
 
-    function openRestartModal() {
-      if (gameState.history.length === 0 || gameState.isFinished) {
-        startNewLeg();
+    // --- Spelers Modal ---
+    function openPlayerModal() {
+      document.getElementById('p1Input').value = player1Name;
+      document.getElementById('p2Input').value = player2Name;
+      renderRosterBadges();
+      document.getElementById('playerModal').classList.remove('hidden');
+    }
+    function closePlayerModal() {
+      document.getElementById('playerModal').classList.add('hidden');
+    }
+    function savePlayerNames() {
+      const n1 = document.getElementById('p1Input').value.trim() || "Speler 1";
+      const n2 = document.getElementById('p2Input').value.trim() || "Speler 2";
+      player1Name = n1;
+      player2Name = n2;
+
+      [n1, n2].forEach(n => {
+        if (!savedRoster.includes(n)) savedRoster.push(n);
+      });
+
+      persistState();
+      updatePlayerNamesUI();
+      updateUI();
+      closePlayerModal();
+    }
+    function swapPlayers() {
+      const p1Val = document.getElementById('p1Input').value;
+      const p2Val = document.getElementById('p2Input').value;
+      document.getElementById('p1Input').value = p2Val;
+      document.getElementById('p2Input').value = p1Val;
+    }
+    function renderRosterBadges() {
+      const list = document.getElementById('savedPlayersList');
+      if (!list) return;
+      list.innerHTML = '';
+      savedRoster.forEach(name => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'px-2 py-1 rounded bg-slate-800 text-[11px] text-slate-300 hover:bg-slate-700 border border-slate-700';
+        btn.textContent = name;
+        btn.onclick = () => {
+          const p1In = document.getElementById('p1Input');
+          const p2In = document.getElementById('p2Input');
+          if (!p1In.value || p1In.value === "Speler 1") p1In.value = name;
+          else p2In.value = name;
+        };
+        list.appendChild(btn);
+      });
+    }
+
+    // --- Wake Lock (Scherm Aan Houden) ---
+    async function toggleWakeLock() {
+      const btn = document.getElementById('wakeLockBtn');
+      const icon = document.getElementById('wakeLockIcon');
+      const text = document.getElementById('wakeLockText');
+
+      if (!('wakeLock' in navigator)) {
+        alert("Wake Lock API wordt niet ondersteund door deze browser.");
         return;
       }
-      document.getElementById('restartModal').classList.remove('hidden');
-    }
-
-    function closeRestartModal() {
-      document.getElementById('restartModal').classList.add('hidden');
-    }
-
-    function confirmRestartLeg() {
-      closeRestartModal();
-      startNewLeg();
-    }
-
-    function renderUI() {
-      const currentTarget = gameState.targetSequence[gameState.currentTargetIndex];
-      const isBull = (currentTarget === "BULL");
-
-      document.getElementById('p1Score').textContent = gameState.p1Score;
-      document.getElementById('p2Score').textContent = gameState.p2Score;
-      document.getElementById('p1Wins').textContent = gameState.p1MatchWins;
-      document.getElementById('p2Wins').textContent = gameState.p2MatchWins;
-      document.getElementById('p1Name').textContent = gameState.player1Name;
-      document.getElementById('p2Name').textContent = gameState.player2Name;
-
-      // Snelle hitrate per speler
-      const p1DartsTotal = gameState.p1Darts.length;
-      const p1Hits = gameState.p1Darts.filter(d => d > 0).length;
-      const p1Rate = p1DartsTotal > 0 ? ((p1Hits / p1DartsTotal) * 100).toFixed(0) : 0;
-      document.getElementById('p1HitRateQuick').textContent = `${p1Rate}% raak (${p1Hits}/${p1DartsTotal})`;
-
-      const p2DartsTotal = gameState.p2Darts.length;
-      const p2Hits = gameState.p2Darts.filter(d => d > 0).length;
-      const p2Rate = p2DartsTotal > 0 ? ((p2Hits / p2DartsTotal) * 100).toFixed(0) : 0;
-      document.getElementById('p2HitRateQuick').textContent = `${p2Rate}% raak (${p2Hits}/${p2DartsTotal})`;
-
-      // Speler highlight
-      const p1Card = document.getElementById('p1Card');
-      const p2Card = document.getElementById('p2Card');
-      const p1Badge = document.getElementById('p1Badge');
-      const p2Badge = document.getElementById('p2Badge');
-      const p1TurnBar = document.getElementById('p1TurnIndicator');
-      const p2TurnBar = document.getElementById('p2TurnIndicator');
-      const activeLabel = document.getElementById('activePlayerLabel');
-
-      if (gameState.activePlayer === 1) {
-        p1Card.className = "relative rounded-xl border-2 border-cyan-500 bg-slate-900/95 glow-cyan p-2 sm:p-2.5 transition-all duration-200 overflow-hidden flex flex-col justify-between shadow-md";
-        p2Card.className = "relative rounded-xl border-2 border-slate-800 bg-slate-900/40 opacity-70 p-2 sm:p-2.5 transition-all duration-200 overflow-hidden flex flex-col justify-between";
-        p1Badge.classList.remove('hidden');
-        p2Badge.classList.add('hidden');
-        p1TurnBar.classList.remove('hidden');
-        p2TurnBar.classList.add('hidden');
-        activeLabel.textContent = gameState.player1Name;
-        activeLabel.className = "text-cyan-400 font-bold";
+      if (wakeLock !== null) {
+        wakeLock.release();
+        wakeLock = null;
+        btn.classList.remove('border-amber-500', 'bg-amber-950/40');
+        icon.className = 'fa-regular fa-lightbulb text-amber-400';
+        text.textContent = 'Scherm Aan';
       } else {
-        p2Card.className = "relative rounded-xl border-2 border-amber-500 bg-slate-900/95 glow-amber p-2 sm:p-2.5 transition-all duration-200 overflow-hidden flex flex-col justify-between shadow-md";
-        p1Card.className = "relative rounded-xl border-2 border-slate-800 bg-slate-900/40 opacity-70 p-2 sm:p-2.5 transition-all duration-200 overflow-hidden flex flex-col justify-between";
-        p2Badge.classList.remove('hidden');
-        p1Badge.classList.add('hidden');
-        p2TurnBar.classList.remove('hidden');
-        p1TurnBar.classList.add('hidden');
-        activeLabel.textContent = gameState.player2Name;
-        activeLabel.className = "text-amber-400 font-bold";
-      }
-
-      // Doelwit Weergave
-      const targetDisplay = document.getElementById('currentTargetDisplay');
-      targetDisplay.textContent = currentTarget;
-      targetDisplay.className = isBull
-        ? "font-darts text-3xl sm:text-4xl leading-none text-red-500 font-extrabold tracking-wider"
-        : "font-darts text-4xl sm:text-5xl leading-none text-white font-bold drop-shadow";
-      document.getElementById('targetIndexDisplay').textContent = gameState.currentTargetIndex + 1;
-
-      // 3-pijlen beurt tracker
-      document.getElementById('currentDartCountText').textContent = `Pijl ${gameState.currentDartInTurn + 1} van 3`;
-      const turnSum = gameState.currentTurnScores.reduce((a, b) => a + b, 0);
-      document.getElementById('turnTotalScore').textContent = `+${turnSum}`;
-
-      const dartLabels = ["MIS", "+1 ENK", "+2 DUB", "+3 TRI"];
-      const bullLabels = ["MIS", "+1 ENK.B", "+2 DUB.B", "-"];
-
-      for (let i = 0; i < 3; i++) {
-        const slot = document.getElementById(`slotDart${i}`);
-        const slotVal = document.getElementById(`slotVal${i}`);
-
-        slot.classList.remove('dart-active-pulse', 'border-cyan-400', 'border-slate-800', 'border-emerald-500/60', 'bg-emerald-950/20', 'bg-slate-800/90');
-
-        if (i < gameState.currentTurnScores.length) {
-          const score = gameState.currentTurnScores[i];
-          const text = isBull ? bullLabels[score] : dartLabels[score];
-          slotVal.textContent = text;
-          slotVal.className = score > 0 ? "text-xs font-bold text-emerald-400 mt-0.5" : "text-xs font-bold text-slate-400 mt-0.5";
-          slot.classList.add('border-emerald-500/60', 'bg-emerald-950/20');
-        } else if (i === gameState.currentDartInTurn) {
-          slotVal.textContent = "Gooien...";
-          slotVal.className = "text-xs font-bold text-cyan-300 mt-0.5";
-          slot.classList.add('border-cyan-400', 'bg-slate-800/90', 'dart-active-pulse');
-        } else {
-          slotVal.textContent = "-";
-          slotVal.className = "text-xs font-bold text-slate-500 mt-0.5";
-          slot.classList.add('border-slate-800');
-        }
-      }
-
-      // Knoppen aanpassen voor Bullseye
-      const btnTriple = document.getElementById('btnTriple');
-      const labelSingle = document.getElementById('labelSingle');
-      const labelDouble = document.getElementById('labelDouble');
-
-      if (isBull) {
-        btnTriple.disabled = true;
-        labelSingle.textContent = "ENK. BULL";
-        labelDouble.textContent = "DUB. BULL";
-      } else {
-        btnTriple.disabled = false;
-        labelSingle.textContent = "ENKEL";
-        labelDouble.textContent = "DUBBEL";
-      }
-
-      document.getElementById('btnUndo').disabled = (gameState.history.length === 0);
-
-      renderTargetsCarousel();
-    }
-
-    function renderTargetsCarousel() {
-      const carousel = document.getElementById('targetsCarousel');
-      carousel.innerHTML = '';
-
-      gameState.targetSequence.forEach((val, idx) => {
-        const item = document.createElement('div');
-        const isCurrent = idx === gameState.currentTargetIndex;
-        const isPast = idx < gameState.currentTargetIndex;
-
-        let badgeStyle = "bg-slate-800/80 text-slate-400 border-slate-700/80";
-        if (isPast) {
-          badgeStyle = "bg-emerald-950/70 border-emerald-600/50 text-emerald-400 line-through opacity-60";
-        } else if (isCurrent) {
-          badgeStyle = "bg-red-600 border-red-400 text-white font-bold scale-105 shadow-md shadow-red-600/40";
-        }
-
-        item.className = `shrink-0 px-2 py-0.5 rounded border text-[11px] font-mono transition-transform duration-150 ${badgeStyle}`;
-        item.textContent = val;
-        carousel.appendChild(item);
-
-        if (isCurrent) {
-          item.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-        }
-      });
-    }
-
-    function openSettingsModal() {
-      document.getElementById('inputP1Name').value = gameState.player1Name;
-      document.getElementById('inputP2Name').value = gameState.player2Name;
-      renderRosterBadges();
-      document.getElementById('settingsModal').classList.remove('hidden');
-    }
-
-    function renderRosterBadges() {
-      const r1 = document.getElementById('recentP1Container');
-      const r2 = document.getElementById('recentP2Container');
-      r1.innerHTML = '';
-      r2.innerHTML = '';
-
-      gameState.savedRoster.forEach(name => {
-        const b1 = document.createElement('button');
-        b1.type = "button";
-        b1.className = "text-[11px] px-2 py-0.5 rounded bg-slate-700/80 hover:bg-cyan-600 hover:text-white text-slate-300 transition";
-        b1.textContent = name;
-        b1.onclick = () => { document.getElementById('inputP1Name').value = name; };
-        r1.appendChild(b1);
-
-        const b2 = document.createElement('button');
-        b2.type = "button";
-        b2.className = "text-[11px] px-2 py-0.5 rounded bg-slate-700/80 hover:bg-amber-600 hover:text-white text-slate-300 transition";
-        b2.textContent = name;
-        b2.onclick = () => { document.getElementById('inputP2Name').value = name; };
-        r2.appendChild(b2);
-      });
-    }
-
-    function swapCurrentPlayers() {
-      const p1Input = document.getElementById('inputP1Name');
-      const p2Input = document.getElementById('inputP2Name');
-      const temp = p1Input.value;
-      p1Input.value = p2Input.value;
-      p2Input.value = temp;
-      showToast('Speler 1 en 2 omgewisseld');
-    }
-
-    function closeSettingsModal() {
-      document.getElementById('settingsModal').classList.add('hidden');
-    }
-
-    function savePlayerNames() {
-      const p1Input = document.getElementById('inputP1Name').value.trim();
-      const p2Input = document.getElementById('inputP2Name').value.trim();
-
-      gameState.player1Name = p1Input || "Speler 1";
-      gameState.player2Name = p2Input || "Speler 2";
-
-      addToRoster(gameState.player1Name);
-      addToRoster(gameState.player2Name);
-
-      savePlayers();
-      renderUI();
-      closeSettingsModal();
-      showToast('Spelers opgeslagen in geheugen');
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toastMessage').textContent = msg;
-      toast.classList.remove('opacity-0');
-      setTimeout(() => {
-        toast.classList.add('opacity-0');
-      }, 2000);
-    }
-
-    window.addEventListener('resize', () => {
-      renderTargetsCarousel();
-    });
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        const swScript = `
-          const CACHE_NAME = 'dartmaster-rtb-noscroll-v5';
-          self.addEventListener('install', event => { self.skipWaiting(); });
-          self.addEventListener('activate', event => { event.waitUntil(clients.claim()); });
-          self.addEventListener('fetch', event => {
-            event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+        try {
+          wakeLock = await navigator.wakeLock.request('screen');
+          btn.classList.add('border-amber-500', 'bg-amber-950/40');
+          icon.className = 'fa-solid fa-lightbulb text-amber-400';
+          text.textContent = 'Scherm Vergrendeld';
+          wakeLock.addEventListener('release', () => {
+            wakeLock = null;
+            btn.classList.remove('border-amber-500', 'bg-amber-950/40');
+            icon.className = 'fa-regular fa-lightbulb text-amber-400';
+            text.textContent = 'Scherm Aan';
           });
-        `;
-        const blob = new Blob([swScript], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl).catch(err => {
-          console.log('SW registration:', err);
-        });
-      });
+        } catch (err) {
+          console.error(err);
+        }
+      }
     }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      loadSavedState();
-      gameState.targetSequence = generateTargetSequence();
-      renderUI();
-    });
   </script>
 </body>
 </html>
