@@ -88,12 +88,12 @@
     </div>
   </header>
 
-  <!-- Hoofdindeling: 2 Kolommen (Speler 1 links, Speler 2 rechts) -->
+  <!-- Hoofdindeling: 2 Kolommen -->
   <main class="flex-1 flex flex-col p-2 sm:p-3 gap-2 min-h-0 overflow-hidden justify-between">
     
     <div class="flex-1 grid grid-cols-2 gap-2 sm:gap-3 min-h-0">
       
-      <!-- KOLOM LINKS: Speler 1 & Beurtweergave (Pijlen + Score + Groot Doel) -->
+      <!-- KOLOM LINKS: Speler 1 & Beurtweergave (Pijlen + Score + Extra Groot Doel) -->
       <div class="flex flex-col gap-2 min-h-0">
         
         <!-- Speler 1 Kaart -->
@@ -122,10 +122,10 @@
           <div id="p1TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 to-cyan-400"></div>
         </div>
 
-        <!-- Beurtpaneel Links: Groot te gooien getal, 3 Pijlen en Huidige Score -->
+        <!-- Beurtpaneel Links: Extra Groot te gooien getal, 3 Pijlen en Huidige Score -->
         <div class="flex-1 bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-3 flex flex-col justify-between shadow-xl min-h-0">
           
-          <!-- Bovenin beurtpaneel: Wie is aan de beurt + Groot Doelwit -->
+          <!-- Bovenin: Wie is aan de beurt + Vergrote Doelcirkel -->
           <div class="flex items-center justify-between">
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5">
@@ -136,11 +136,11 @@
               <span class="text-[11px] text-slate-400">Pijl <span id="currentDartNum" class="font-bold text-amber-400">1</span> van 3</span>
             </div>
 
-            <!-- Extra Groot Doelwit Getal -->
-            <div id="targetDisplayCircle" class="w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 p-[3px] shadow-xl shadow-amber-500/25 active-target-pulse shrink-0">
-              <div class="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border-2 border-amber-400/50 p-2">
-                <span id="currentTargetNum" class="text-3xl sm:text-5xl font-black text-amber-300 font-mono leading-none">--</span>
-                <span id="targetSubLabel" class="text-[8px] font-bold text-amber-500 uppercase tracking-wider mt-0.5">DOEL</span>
+            <!-- Vergrote Doelcirkel met extra groot getal -->
+            <div id="targetDisplayCircle" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 p-[3px] shadow-2xl shadow-amber-500/30 active-target-pulse shrink-0">
+              <div class="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border-2 border-amber-400/60 p-2">
+                <span id="currentTargetNum" class="text-4xl sm:text-6xl font-black text-amber-300 font-mono leading-none tracking-tight">--</span>
+                <span id="targetSubLabel" class="text-[9px] font-bold text-amber-500 uppercase tracking-widest mt-1">DOEL</span>
               </div>
             </div>
           </div>
@@ -176,7 +176,7 @@
 
       </div>
 
-      <!-- KOLOM RECHTS: Speler 2 & GROTE Score Invoerknoppen direct eronder -->
+      <!-- KOLOM RECHTS: Speler 2 & GROTE Invoerknoppen direct eronder -->
       <div class="flex flex-col gap-2 min-h-0">
         
         <!-- Speler 2 Kaart -->
@@ -205,31 +205,31 @@
           <div id="p2TurnIndicator" class="hidden absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 to-blue-400"></div>
         </div>
 
-        <!-- GROTE Invoerknoppen onder Speler 2 -->
+        <!-- Invoerknoppen (Met Enkele Bull = 2pt en Dubbele Bull = 4pt dynamisch aangestuurd) -->
         <div class="flex-1 flex flex-col gap-2 min-h-0">
           <div class="grid grid-cols-2 gap-2 flex-1 min-h-0">
             <!-- MIS -->
-            <button onclick="registerThrow(0)" class="tap-btn flex-1 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700 hover:border-slate-500 text-slate-200 flex flex-col items-center justify-center p-2 shadow-xl active:bg-slate-700">
+            <button onclick="handleThrowClick('miss')" class="tap-btn flex-1 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700 hover:border-slate-500 text-slate-200 flex flex-col items-center justify-center p-2 shadow-xl active:bg-slate-700">
               <span class="text-xl sm:text-3xl font-black tracking-wider text-rose-400 flex items-center gap-1 leading-tight">
                 <i class="fa-solid fa-xmark text-base sm:text-xl"></i> MIS
               </span>
               <span class="text-xs sm:text-sm text-slate-400 font-semibold mt-0.5">0 pt</span>
             </button>
 
-            <!-- ENKEL -->
-            <button id="btnSingle" onclick="registerThrow(1)" class="tap-btn flex-1 rounded-2xl bg-gradient-to-b from-emerald-950/80 to-slate-900 border-2 border-emerald-600/80 hover:border-emerald-400 text-emerald-100 flex flex-col items-center justify-center p-2 shadow-xl shadow-emerald-950/30 active:bg-emerald-900">
+            <!-- ENKEL (of Enkele Bull: 2pt) -->
+            <button id="btnSingle" onclick="handleThrowClick('single')" class="tap-btn flex-1 rounded-2xl bg-gradient-to-b from-emerald-950/80 to-slate-900 border-2 border-emerald-600/80 hover:border-emerald-400 text-emerald-100 flex flex-col items-center justify-center p-2 shadow-xl shadow-emerald-950/30 active:bg-emerald-900">
               <span id="lblSingle" class="text-xl sm:text-3xl font-black tracking-wider text-emerald-400 leading-tight">ENKEL</span>
               <span id="subSingle" class="text-xs sm:text-sm text-emerald-300/80 font-semibold mt-0.5">1 pt</span>
             </button>
 
-            <!-- DUBBEL -->
-            <button id="btnDouble" onclick="registerThrow(2)" class="tap-btn flex-1 rounded-2xl bg-gradient-to-b from-blue-950/80 to-slate-900 border-2 border-blue-600/80 hover:border-blue-400 text-blue-100 flex flex-col items-center justify-center p-2 shadow-xl shadow-blue-950/30 active:bg-blue-900">
+            <!-- DUBBEL (of Dubbele Bull: 4pt) -->
+            <button id="btnDouble" onclick="handleThrowClick('double')" class="tap-btn flex-1 rounded-2xl bg-gradient-to-b from-blue-950/80 to-slate-900 border-2 border-blue-600/80 hover:border-blue-400 text-blue-100 flex flex-col items-center justify-center p-2 shadow-xl shadow-blue-950/30 active:bg-blue-900">
               <span id="lblDouble" class="text-xl sm:text-3xl font-black tracking-wider text-blue-400 leading-tight">DUBBEL</span>
               <span id="subDouble" class="text-xs sm:text-sm text-blue-300/80 font-semibold mt-0.5">2 pt</span>
             </button>
 
             <!-- TRIPLE -->
-            <button id="btnTriple" onclick="registerThrow(3)" class="tap-btn flex-1 rounded-2xl bg-gradient-to-b from-purple-950/80 to-slate-900 border-2 border-purple-600/80 hover:border-purple-400 text-purple-100 flex flex-col items-center justify-center p-2 shadow-xl shadow-purple-950/30 active:bg-purple-900 disabled:opacity-30 disabled:pointer-events-none">
+            <button id="btnTriple" onclick="handleThrowClick('triple')" class="tap-btn flex-1 rounded-2xl bg-gradient-to-b from-purple-950/80 to-slate-900 border-2 border-purple-600/80 hover:border-purple-400 text-purple-100 flex flex-col items-center justify-center p-2 shadow-xl shadow-purple-950/30 active:bg-purple-900 disabled:opacity-30 disabled:pointer-events-none">
               <span id="lblTriple" class="text-xl sm:text-3xl font-black tracking-wider text-purple-400 leading-tight">TRIPLE</span>
               <span id="subTriple" class="text-xs sm:text-sm text-purple-300/80 font-semibold mt-0.5">3 pt</span>
             </button>
@@ -352,7 +352,7 @@
     let currentPlayer = 1; 
     let currentDart = 1; 
 
-    let p1TurnThrows = [];
+    let p1TurnThrows = []; // Bevat objecten: { points: X, type: 'miss'|'single'|'double'|'triple' }
     let p2TurnThrows = [];
 
     let p1LastTurnScore = null;
@@ -497,12 +497,13 @@
       const lblDouble = document.getElementById('lblDouble');
       const subDouble = document.getElementById('subDouble');
 
+      // Regel: Enkele bull = 2pt, Dubbele bull = 4pt
       if (isBull) {
         btnTriple.disabled = true;
         lblSingle.textContent = 'BULL (25)';
-        subSingle.textContent = '1 pt';
+        subSingle.textContent = '2 pt';
         lblDouble.textContent = 'BULL (50)';
-        subDouble.textContent = '2 pt';
+        subDouble.textContent = '4 pt';
       } else {
         btnTriple.disabled = false;
         lblSingle.textContent = 'ENKEL';
@@ -517,7 +518,7 @@
     function calculateHitPercentageData(throws) {
       const total = throws.length;
       if (total === 0) return { pct: '0%', text: '0% (0/0)' };
-      const hits = throws.filter(t => t > 0).length;
+      const hits = throws.filter(t => t.points > 0).length;
       const pctValue = Math.round((hits / total) * 100);
       return {
         pct: `${pctValue}%`,
@@ -526,8 +527,8 @@
     }
 
     function updateUI() {
-      const p1Total = p1MatchThrows.reduce((a, b) => a + b, 0);
-      const p2Total = p2MatchThrows.reduce((a, b) => a + b, 0);
+      const p1Total = p1MatchThrows.reduce((a, b) => a + b.points, 0);
+      const p2Total = p2MatchThrows.reduce((a, b) => a + b.points, 0);
 
       document.getElementById('p1Score').textContent = p1Total;
       document.getElementById('p2Score').textContent = p2Total;
@@ -572,10 +573,18 @@
       for (let i = 0; i < 3; i++) {
         const slot = document.getElementById(`dartSlot${i}`);
         if (i < activeThrows.length) {
-          const val = activeThrows[i];
-          const text = val === 0 ? 'M' : val === 1 ? '1x' : val === 2 ? '2x' : '3x';
-          const color = val === 0 ? 'text-rose-400 border-rose-800 bg-rose-950/40' : 'text-emerald-400 border-emerald-700 bg-emerald-950/40';
-          slot.className = `w-full h-11 sm:h-12 rounded-xl border-2 flex items-center justify-center font-black text-sm sm:text-base font-mono ${color}`;
+          const item = activeThrows[i];
+          let text = 'M';
+          let color = 'text-rose-400 border-rose-800 bg-rose-950/40';
+
+          if (item.points > 0) {
+            color = 'text-emerald-400 border-emerald-700 bg-emerald-950/40';
+            if (item.type === 'single') text = item.points === 2 ? 'Bull (2)' : '1x';
+            else if (item.type === 'double') text = item.points === 4 ? 'D-Bull (4)' : '2x';
+            else if (item.type === 'triple') text = '3x';
+          }
+
+          slot.className = `w-full h-11 sm:h-12 rounded-xl border-2 flex items-center justify-center font-black text-xs sm:text-sm font-mono ${color}`;
           slot.textContent = text;
         } else if (i === activeThrows.length) {
           slot.className = 'w-full h-11 sm:h-12 rounded-xl border-2 border-emerald-500 bg-slate-900 flex items-center justify-center font-black text-sm sm:text-base text-white font-mono animate-pulse';
@@ -586,29 +595,49 @@
         }
       }
 
-      const turnSum = activeThrows.reduce((a, b) => a + b, 0);
+      const turnSum = activeThrows.reduce((a, b) => a + b.points, 0);
       document.getElementById('turnPointsBadge').textContent = `+${turnSum} pt`;
       document.getElementById('undoBtn').disabled = actionHistory.length === 0;
     }
 
-    function registerThrow(points) {
+    // Centrale click-handler voor invoerknoppen
+    function handleThrowClick(type) {
       if (currentTargetIndex >= targets.length) return;
+
+      const isBull = targets[currentTargetIndex] === 25;
+      let points = 0;
+
+      if (type === 'miss') {
+        points = 0;
+      } else if (type === 'single') {
+        points = isBull ? 2 : 1; // Enkele bull = 2pt
+      } else if (type === 'double') {
+        points = isBull ? 4 : 2; // Dubbele bull = 4pt
+      } else if (type === 'triple') {
+        points = 3;
+      }
+
+      registerThrow(points, type);
+    }
+
+    function registerThrow(points, type) {
+      const throwItem = { points, type };
 
       actionHistory.push({
         player: currentPlayer,
         targetIndex: currentTargetIndex,
         dartNum: currentDart,
-        points: points,
+        throwItem: throwItem,
         p1LastScoreBefore: p1LastTurnScore,
         p2LastScoreBefore: p2LastTurnScore
       });
 
       if (currentPlayer === 1) {
-        p1TurnThrows.push(points);
-        p1MatchThrows.push(points);
+        p1TurnThrows.push(throwItem);
+        p1MatchThrows.push(throwItem);
       } else {
-        p2TurnThrows.push(points);
-        p2MatchThrows.push(points);
+        p2TurnThrows.push(throwItem);
+        p2MatchThrows.push(throwItem);
       }
 
       if (navigator.vibrate) {
@@ -619,12 +648,12 @@
         currentDart++;
       } else {
         if (currentPlayer === 1) {
-          p1LastTurnScore = p1TurnThrows.reduce((a, b) => a + b, 0);
+          p1LastTurnScore = p1TurnThrows.reduce((a, b) => a + b.points, 0);
           currentPlayer = 2;
           currentDart = 1;
           p2TurnThrows = [];
         } else {
-          p2LastTurnScore = p2TurnThrows.reduce((a, b) => a + b, 0);
+          p2LastTurnScore = p2TurnThrows.reduce((a, b) => a + b.points, 0);
           if (currentTargetIndex < targets.length - 1) {
             currentTargetIndex++;
             currentPlayer = 1;
@@ -665,8 +694,8 @@
     }
 
     function handleGameEnd() {
-      const p1Total = p1MatchThrows.reduce((a, b) => a + b, 0);
-      const p2Total = p2MatchThrows.reduce((a, b) => a + b, 0);
+      const p1Total = p1MatchThrows.reduce((a, b) => a + b.points, 0);
+      const p2Total = p2MatchThrows.reduce((a, b) => a + b.points, 0);
 
       if (p1Total > p2Total) {
         p1SetsWon++;
@@ -693,8 +722,8 @@
 
       if (isGameOver) {
         title.innerHTML = '<i class="fa-solid fa-trophy text-amber-400"></i> Einduitslag & Statistieken';
-        const p1Total = p1MatchThrows.reduce((a, b) => a + b, 0);
-        const p2Total = p2MatchThrows.reduce((a, b) => a + b, 0);
+        const p1Total = p1MatchThrows.reduce((a, b) => a + b.points, 0);
+        const p2Total = p2MatchThrows.reduce((a, b) => a + b.points, 0);
         const winner = p1Total > p2Total ? `${player1Name} wint!` : p2Total > p1Total ? `${player2Name} wint!` : 'Gelijkspel!';
         subtitle.textContent = `${winner} Stand: ${p1Total} - ${p2Total}`;
         endBtn.classList.remove('hidden');
@@ -729,10 +758,10 @@
           <div class="divide-y divide-slate-850">
             ${renderStatRow('Rake Pijlen %', `${p1Stats.hitPercent}%`, `${p2Stats.hitPercent}%`, p1Stats.hitPercent, p2Stats.hitPercent)}
             ${renderStatRow('Raken / Totaal', `${p1Stats.hits}/${p1Stats.totalDarts}`, `${p2Stats.hits}/${p2Stats.totalDarts}`)}
-            ${renderStatRow('Triples (3pt)', `${p1Stats.triples} (${p1Stats.triplesPct}%)`, `${p2Stats.triples} (${p2Stats.triplesPct}%)`, p1Stats.triples, p2Stats.triples)}
-            ${renderStatRow('Doubles (2pt)', `${p1Stats.doubles} (${p1Stats.doublesPct}%)`, `${p2Stats.doubles} (${p2Stats.doublesPct}%)`, p1Stats.doubles, p2Stats.doubles)}
-            ${renderStatRow('Singles (1pt)', `${p1Stats.singles} (${p1Stats.singlesPct}%)`, `${p2Stats.singles} (${p2Stats.singlesPct}%)`, p1Stats.singles, p2Stats.singles)}
-            ${renderStatRow('Missers (0pt)', `${p1Stats.misses} (${p1Stats.missesPct}%)`, `${p2Stats.misses} (${p2Stats.missesPct}%)`, -p1Stats.misses, -p2Stats.misses)}
+            ${renderStatRow('Triples', `${p1Stats.triples} (${p1Stats.triplesPct}%)`, `${p2Stats.triples} (${p2Stats.triplesPct}%)`, p1Stats.triples, p2Stats.triples)}
+            ${renderStatRow('Doubles / D-Bull', `${p1Stats.doubles} (${p1Stats.doublesPct}%)`, `${p2Stats.doubles} (${p2Stats.doublesPct}%)`, p1Stats.doubles, p2Stats.doubles)}
+            ${renderStatRow('Singles / Bull', `${p1Stats.singles} (${p1Stats.singlesPct}%)`, `${p2Stats.singles} (${p2Stats.singlesPct}%)`, p1Stats.singles, p2Stats.singles)}
+            ${renderStatRow('Missers', `${p1Stats.misses} (${p1Stats.missesPct}%)`, `${p2Stats.misses} (${p2Stats.missesPct}%)`, -p1Stats.misses, -p2Stats.misses)}
             ${renderStatRow('Gem. per Beurt', p1Stats.avgTurn, p2Stats.avgTurn, parseFloat(p1Stats.avgTurn), parseFloat(p2Stats.avgTurn))}
           </div>
         </div>
@@ -764,10 +793,10 @@
       }
       let singles = 0, doubles = 0, triples = 0, misses = 0, points = 0;
       throws.forEach(t => {
-        points += t;
-        if (t === 3) triples++;
-        else if (t === 2) doubles++;
-        else if (t === 1) singles++;
+        points += t.points;
+        if (t.type === 'triple') triples++;
+        else if (t.type === 'double') doubles++;
+        else if (t.type === 'single') singles++;
         else misses++;
       });
       const hits = singles + doubles + triples;
@@ -829,7 +858,7 @@
       const p1Val = document.getElementById('p1Input').value;
       const p2Val = document.getElementById('p2Input').value;
       document.getElementById('p1Input').value = p2Val;
-      document.getElementById('p1Input').value = p1Val;
+      document.getElementById('p2Input').value = p1Val;
     }
     function renderRosterBadges() {
       const list = document.getElementById('savedPlayersList');
